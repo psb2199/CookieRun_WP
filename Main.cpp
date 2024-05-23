@@ -14,6 +14,7 @@ LPCTSTR lpszWindowName = L"Window Programming Lab";
 #define WINDOW_HEIGHT 600
 
 // 김성준바보
+// 박수빈바보
 LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam);
 
 void Initialize();
