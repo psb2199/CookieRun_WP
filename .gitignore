@@ -301,7 +301,7 @@ node_modules/
 *.dsw
 *.dsp
 
-# Visual Studio 6 technical files
+# Visual Studio 6 technical files 
 *.ncb
 *.aps
 
@@ -395,6 +395,4 @@ FodyWeavers.xsd
 *.msp
 
 # JetBrains Rider
-
-C++.gitignore
 *.sln.iml
