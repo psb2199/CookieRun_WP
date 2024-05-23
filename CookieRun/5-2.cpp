@@ -13,6 +13,8 @@ LPCTSTR lpszWindowName = L"Window Programming Lab";
 #define WINDOW_WIDTH 600
 #define WINDOW_HEIGHT 600
 
+//±Ëº∫¡ÿ πŸ∫∏
+
 LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam);
 
 void Initialize();
