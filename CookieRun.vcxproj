@@ -108,6 +108,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalOptions>msimg32.lib %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -127,6 +128,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ImageLoader.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Draw.cpp" />
     <ClCompile Include="MyH.cpp" />
@@ -135,6 +137,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Draw.h" />
+    <ClInclude Include="ImageLoader.h" />
     <ClInclude Include="MyH.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="ObjectManager.h" />

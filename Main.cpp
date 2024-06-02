@@ -6,18 +6,20 @@
 #include "MyH.h"
 #include "Draw.h"
 #include "ObjectManager.h"
+#include "ImageLoader.h"
 
 HINSTANCE g_hInst;
 LPCTSTR lpszClass = L"Window Class Name";
-LPCTSTR lpszWindowName = L"Window Programming Lab";
-#define WINDOW_WIDTH 600
+LPCTSTR lpszWindowName = L"CookieRun";
+#define WINDOW_WIDTH 1000
 #define WINDOW_HEIGHT 600
+#define DELTA_TIME 0.008
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam);
 
 void Initialize();
 void DrawObject(HDC mdc);
-void UpdateObjects();
+void TickEvent();
 void KeyDownEvents(HWND hWnd, WPARAM wParam);
 void KeyUpEvents(HWND hWnd, WPARAM wParam);
 struct KeyEventFlag {
@@ -44,15 +46,9 @@ struct MouseEventFlag {
 };
 MouseEventFlag MOUSE;
 
-#define DELTA_TIME 0.008
-
-int board_size = 20;
-void MakeBoard(float gap);
-
+ImageLoader ImageL;
 ObjectManager ObjectMgr;
-
 Object* Player;
-
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdParam, int nCmdShow) {
 	HWND hWnd;
@@ -133,49 +129,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		break;
 
 	case WM_PAINT:
-		//hDC = BeginPaint(hWnd, &ps);
-
-		//// 오프스크린 버퍼를 위한 메모리 DC 및 비트맵 생성
-		//offScreenDC = CreateCompatibleDC(hDC);
-		//offScreenBitmap = CreateCompatibleBitmap(hDC, ps.rcPaint.right - ps.rcPaint.left, ps.rcPaint.bottom - ps.rcPaint.top);
-		//oldBitmap = (HBITMAP)SelectObject(offScreenDC, offScreenBitmap);
-
-		//// 배경 지우기
-		//FillRect(offScreenDC, &ps.rcPaint, (HBRUSH)(COLOR_WINDOW + 1));
-
-		//// 오프스크린 버퍼에 그리기 작업 수행
-		//mDC = CreateCompatibleDC(offScreenDC);
-		//SelectObject(mDC, hBitmap);
-
-		//StretchBlt(offScreenDC, 0, 0, bitmapX, bitmapY, mDC, 0, 0, 274, 184, SRCCOPY);
-		//StretchBlt(offScreenDC, bitmapX, 0, WINDOW_WIDTH - bitmapX, bitmapY, mDC, 0, 0, 274, 184, SRCCOPY);
-		//StretchBlt(offScreenDC, 0, bitmapY, bitmapX, WINDOW_HEIGHT - bitmapY, mDC, 0, 0, 274, 184, SRCCOPY);
-		//StretchBlt(offScreenDC, bitmapX, bitmapY, WINDOW_WIDTH - bitmapX, WINDOW_HEIGHT - bitmapY, mDC, 0, 0, 274, 184, SRCCOPY);
-		//DeleteDC(mDC);
-
-		//// 추가적인 그리기 작업
-		////DrawObject(offScreenDC);
-
-		//// 오프스크린 버퍼를 화면에 복사
-		//BitBlt(hDC, ps.rcPaint.left, ps.rcPaint.top, ps.rcPaint.right - ps.rcPaint.left, ps.rcPaint.bottom - ps.rcPaint.top, offScreenDC, 0, 0, SRCCOPY);
-
-		//// 오프스크린 버퍼 및 메모리 DC 정리
-		//SelectObject(offScreenDC, oldBitmap);
-		//DeleteObject(offScreenBitmap);
-		//DeleteDC(offScreenDC);
-
-		//EndPaint(hWnd, &ps);
 		hDC = GetDC(hWnd);
 		hBitmap = CreateCompatibleBitmap(hDC, WINDOW_WIDTH, WINDOW_HEIGHT);
 		mDC = CreateCompatibleDC(hDC);
 		(HBITMAP)SelectObject(mDC, hBitmap);
 
+
 		DrawObject(mDC);
 
+
 		BitBlt(hDC, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, mDC, 0, 0, SRCCOPY);
-
 		TransparentBlt(hDC, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, mDC, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, RGB(0, 0, 0));
-
 		InvalidateRect(hWnd, NULL, FALSE);
 
 		DeleteDC(mDC);
@@ -186,7 +150,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 	case WM_TIMER:
 		GameTime += DELTA_TIME;
-		UpdateObjects();
+		TickEvent();
 		InvalidateRect(hWnd, NULL, false);
 		break;
 
@@ -200,18 +164,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 void Initialize() {
 	ObjectMgr.DeleteAll();
+	ImageL.LoadAllImage();
 
-	ObjectMgr.AddObject("SpaceBG", 0, 0, 0, 0, L"SpaceBG.bmp")->SetObjectVertexLocation(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
-	Player = ObjectMgr.AddObject("Cookie", 0, 50, 100, 100, L"Brave-Cookie.bmp");
-	Player->SetObjectVertexLocation(Player->pos_x - Player->size, Player->pos_y - Player->size, Player->pos_x + Player->size, Player->pos_y + Player->size);
-
+	
+	Player = ObjectMgr.AddObject("Cookie", ImageL.I_BraveCookie, 1, 100, 100);
+	
 }
 
 void DrawObject(HDC mdc) {
 	ObjectMgr.DrawAll(mdc);
+
+	//ImageL.I_BraveCookie.Draw(mdc, 100, 100, 200, 200);
 }
 
-void UpdateObjects() {
+void TickEvent() {
 	Object* ptr = ObjectMgr.GetAllObjects();
 
 	while (ptr != nullptr)
@@ -220,28 +186,6 @@ void UpdateObjects() {
 
 		ptr->m_ElapseTime += DELTA_TIME;
 		ptr = ptr->next;
-	}
-
-	float speed = 5;
-	if (KEY.up)
-	{
-		Player->AddMovement(0, -speed);
-	}
-	if (KEY.down)
-	{
-		Player->AddMovement(0, speed);
-	}
-	if (KEY.left)
-	{
-		Player->AddMovement(-speed, 0);
-	}
-	if (KEY.right)
-	{
-		Player->AddMovement(speed, 0);
-	}
-	if (KEY.enter)
-	{
-		Player->ani_state = ANI_jumping;
 	}
 }
 

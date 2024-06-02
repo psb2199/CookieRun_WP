@@ -1,5 +1,6 @@
 #pragma once
 #include "Object.h"
+#include "ImageLoader.h"
 
 class ObjectManager
 {
@@ -14,7 +15,7 @@ public:
 	ObjectManager();
 	~ObjectManager();
 
-	Object* AddObject(std::string type, COLORREF color, float size, float x, float y, LPCTSTR strFileName);
+	Object* AddObject(std::string type, CImage &image, float size, float x, float y);
 	void DeleteObject(Object* object);
 	void DeleteAll();
 
