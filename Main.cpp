@@ -168,7 +168,7 @@ void Initialize() {
 
 	
 	ObjectMgr.AddObject("BackGround", ImageL.I_BackGround, 1, 0, 0);
-	Player = ObjectMgr.AddObject("Cookie", ImageL.I_BraveCookie, 1, 100, 400);
+	Player = ObjectMgr.AddObject("Cookie", ImageL.I_AngelCookie, 1, 100, 400);
 }
 
 void DrawObject(HDC mdc) {

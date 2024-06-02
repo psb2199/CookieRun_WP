@@ -41,7 +41,7 @@ void Object::DrawObjectImage(HDC mdc)
 
 	if (type == "Cookie")
 	{
-		int sprite_size = 269; // 프레임 하나의 사이즈
+		int sprite_size = 319; // 프레임 하나의 사이즈
 		int line_size = 3; // 프레임과 프레임 사이의 선 사이즈
 
 		float animation_speed = 7;

@@ -10,7 +10,7 @@ public:
 
 	void LoadAllImage();
 
-	CImage I_BraveCookie;
+	CImage I_AngelCookie;
 	CImage I_BackGround;
 };
 
