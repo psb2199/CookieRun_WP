@@ -13,8 +13,6 @@ LPCTSTR lpszWindowName = L"Window Programming Lab";
 #define WINDOW_WIDTH 600
 #define WINDOW_HEIGHT 600
 
-// ±è¼ºÁØ¹Ùº¸
-// ¹Ú¼öºó¹Ùº¸
 LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam);
 
 void Initialize();
@@ -27,6 +25,8 @@ struct KeyEventFlag {
 	bool down{ false };
 	bool right{ false };
 	bool left{ false };
+	bool enter{ false };
+
 	bool KeyPlus{ false };
 	bool KeySubtract{ false };
 };
@@ -50,6 +50,8 @@ int board_size = 20;
 void MakeBoard(float gap);
 
 ObjectManager ObjectMgr;
+
+Object* Player;
 
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdParam, int nCmdShow) {
@@ -198,8 +200,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 void Initialize() {
 	ObjectMgr.DeleteAll();
-	ObjectMgr.AddObject("d", 0, 0, 0, 0, L"Test.bmp")->SetObjectVertexLocation(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
-	
+
+	ObjectMgr.AddObject("SpaceBG", 0, 0, 0, 0, L"SpaceBG.bmp")->SetObjectVertexLocation(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+	Player = ObjectMgr.AddObject("Cookie", 0, 50, 100, 100, L"Brave-Cookie.bmp");
+	Player->SetObjectVertexLocation(Player->pos_x - Player->size, Player->pos_y - Player->size, Player->pos_x + Player->size, Player->pos_y + Player->size);
 
 }
 
@@ -213,9 +217,32 @@ void UpdateObjects() {
 	while (ptr != nullptr)
 	{
 
+
+		ptr->m_ElapseTime += DELTA_TIME;
 		ptr = ptr->next;
 	}
 
+	float speed = 5;
+	if (KEY.up)
+	{
+		Player->AddMovement(0, -speed);
+	}
+	if (KEY.down)
+	{
+		Player->AddMovement(0, speed);
+	}
+	if (KEY.left)
+	{
+		Player->AddMovement(-speed, 0);
+	}
+	if (KEY.right)
+	{
+		Player->AddMovement(speed, 0);
+	}
+	if (KEY.enter)
+	{
+		Player->ani_state = ANI_jumping;
+	}
 }
 
 void KeyDownEvents(HWND hWnd, WPARAM wParam) {
@@ -235,6 +262,9 @@ void KeyDownEvents(HWND hWnd, WPARAM wParam) {
 	case VK_RIGHT:
 		KEY.right = true;
 		break;
+	case VK_RETURN:
+		KEY.enter = true;
+		break;
 
 	case VK_ADD:
 		KEY.KeyPlus = true;
@@ -243,13 +273,7 @@ void KeyDownEvents(HWND hWnd, WPARAM wParam) {
 		KEY.KeySubtract = true;
 		break;
 
-	case 'A':
-	case 'a':
-	break;
 
-	case 'R':
-	case 'r':
-		break;
 	case 'Q':
 	case 'q':
 		PostQuitMessage(0);
@@ -272,6 +296,10 @@ void KeyUpEvents(HWND hWnd, WPARAM wParam) {
 	case VK_RIGHT:
 		KEY.right = false;
 		break;
+	case VK_RETURN:
+		KEY.enter = false;
+		break;
+
 	case VK_ADD:
 		KEY.KeyPlus = false;
 		break;
@@ -286,6 +314,8 @@ void MouseLeftDownEvent(LPARAM lParam) {
 	MOUSE.left_click = true;
 	MOUSE.x = LOWORD(lParam);
 	MOUSE.y = HIWORD(lParam);
+
+
 }
 
 void MouseLeftUpEvent(LPARAM lParam) {
@@ -301,3 +331,6 @@ void MouseRightDownEvent(LPARAM lParam) {
 void MouseRightUpEvent(LPARAM lParam) {
 	MOUSE.right_click = false;
 }
+
+
+

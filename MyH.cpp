@@ -33,6 +33,11 @@ float MyH::Degree(float Radian)
     return Radian * 180 / PI;
 }
 
+float MyH::fract(float value)
+{
+    return value - floor(value);
+}
+
 float MyH::GetLookAtDirection(float Obj_x, float Obj_y, float LookObj_x, float LookObj_y)
 {
     float del_x = LookObj_x - Obj_x;

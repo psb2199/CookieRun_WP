@@ -4,6 +4,10 @@
 #include "Draw.h"
 #include <atlimage.h>
 
+#define ANI_idle 0
+#define ANI_running 1
+#define ANI_jumping 2
+
 class Object
 {
 public:
@@ -17,9 +21,11 @@ public:
 
 	void SetObjectVertexLocation(float x1, float y1, float x2, float y2);
 	void AddMovement(float del_x, float del_y);
+	void SetObjectLocation(float x, float y);
 
 	CImage ObjectImage;
-	
+
+
 public:
 
 
@@ -32,6 +38,8 @@ public:
 	float vel_x;
 	float vel_y;
 	float dir;
+
+	float m_ElapseTime;
 
 	Object* next;
 	Object* prev;
@@ -66,10 +74,14 @@ public:
 	bool bord_switch;
 	//========================
 
+	float origin_x;
+	float origin_y;
 
 	float left_x;
 	float top_y;
 	float right_x;
 	float bottom_y;
+
+	int ani_state;
 };
 
