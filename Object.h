@@ -6,11 +6,7 @@
 #include "Draw.h"
 
 
-#define ANI_idle 0
-#define ANI_running 1
-#define ANI_jumping 2
-
-struct ImageVertex 
+struct RectRange 
 {
 	float left;
 	float top;
@@ -23,6 +19,8 @@ class Object
 public:
 	Object();
 	~Object();
+	void BeginEvents();
+	void TickEvents();
 
 	void DrawObject(HDC m_mDC);
 	void DrawObjectImage(HDC mdc);
@@ -32,7 +30,7 @@ public:
 	void SetObjectVertexLocation(float x1, float y1, float x2, float y2);
 	void AddObjectMovement(float del_x, float del_y);
 	void SetObjectLocation(float x, float y);
-
+	void SetCollisionBox(float l, float r, float t, float b);
 
 
 public:
@@ -49,8 +47,9 @@ public:
 	Object* next;
 	Object* prev;
 
-	ImageVertex image; //이미지의 (x1, y1) , (x2, y2)의 좌표
-	
+	RectRange image; //이미지의 (x1, y1) , (x2, y2)의 좌표
+	RectRange CollisionBox;
+
 	int ani_state;
 };
 

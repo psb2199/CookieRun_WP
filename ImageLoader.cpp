@@ -11,6 +11,6 @@ ImageLoader::~ImageLoader()
 
 void ImageLoader::LoadAllImage()
 {
-	I_BraveCookie.Load(L"Brave_Cookie.bmp");
-	
+	I_BraveCookie.Load(L".\\CookieRun_Resource\\cookie\\Brave_Cookie.bmp");
+	I_BackGround.Load(L".\\CookieRun_Resource\\Land1\\Land1¹è°æ2.bmp");
 }

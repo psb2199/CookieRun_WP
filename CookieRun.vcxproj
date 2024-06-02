@@ -137,6 +137,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Draw.h" />
+    <ClInclude Include="Grobal.h" />
     <ClInclude Include="ImageLoader.h" />
     <ClInclude Include="MyH.h" />
     <ClInclude Include="Object.h" />

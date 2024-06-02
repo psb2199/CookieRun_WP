@@ -32,7 +32,7 @@ Object* ObjectManager::AddObject(std::string type, CImage &image, float size, fl
 	newObject->image.bottom = newObject->pos_y + imageH / 2;
 
 	
-
+	newObject->BeginEvents();
 	newObject->next = nullptr; // 새로운 노드의 다음 노드는 없음
 
 	if (Head == nullptr) {

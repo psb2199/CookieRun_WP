@@ -2,6 +2,7 @@
 #include <tchar.h>
 #include <iostream>
 #include <string>
+#include "Grobal.h"
 
 #include "MyH.h"
 #include "Draw.h"
@@ -11,9 +12,7 @@
 HINSTANCE g_hInst;
 LPCTSTR lpszClass = L"Window Class Name";
 LPCTSTR lpszWindowName = L"CookieRun";
-#define WINDOW_WIDTH 1000
-#define WINDOW_HEIGHT 600
-#define DELTA_TIME 0.008
+
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam);
 
@@ -49,6 +48,7 @@ MouseEventFlag MOUSE;
 ImageLoader ImageL;
 ObjectManager ObjectMgr;
 Object* Player;
+void PlayerHandler();
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdParam, int nCmdShow) {
 	HWND hWnd;
@@ -167,14 +167,12 @@ void Initialize() {
 	ImageL.LoadAllImage();
 
 	
-	Player = ObjectMgr.AddObject("Cookie", ImageL.I_BraveCookie, 1, 100, 100);
-	
+	ObjectMgr.AddObject("BackGround", ImageL.I_BackGround, 1, 0, 0);
+	Player = ObjectMgr.AddObject("Cookie", ImageL.I_BraveCookie, 1, 100, 400);
 }
 
 void DrawObject(HDC mdc) {
 	ObjectMgr.DrawAll(mdc);
-
-	//ImageL.I_BraveCookie.Draw(mdc, 100, 100, 200, 200);
 }
 
 void TickEvent() {
@@ -182,11 +180,19 @@ void TickEvent() {
 
 	while (ptr != nullptr)
 	{
-
-
+		ptr->TickEvents();
 		ptr->m_ElapseTime += DELTA_TIME;
 		ptr = ptr->next;
 	}
+
+	PlayerHandler();
+}
+
+void PlayerHandler() 
+{	
+	/*float speed{ 10.0 };
+	if (KEY.left) Player->AddObjectMovement(-speed, 0);
+	if (KEY.right) Player->AddObjectMovement(speed, 0);*/
 }
 
 void KeyDownEvents(HWND hWnd, WPARAM wParam) {
