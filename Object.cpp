@@ -123,6 +123,7 @@ void Object::BeginEvents()
 void Object::TickEvents()
 {
 	// 주기적으로 계속 발생하는 이벤트(주기는 0.008초) 
+	UpdateCollisionBox();
 
 	if (type == "BackGround")
 	{
@@ -204,6 +205,19 @@ void Object::SetCollisionBox(float l, float r, float t, float b)
 	CollisionBox.right = pos_x + r;
 	CollisionBox.top = pos_y - t;
 	CollisionBox.bottom = pos_y + b;
+
+	Del_CollisionBox.left = l;
+	Del_CollisionBox.right = r;
+	Del_CollisionBox.top = t;
+	Del_CollisionBox.bottom = b;
+}
+
+void Object::UpdateCollisionBox()
+{
+	CollisionBox.left = pos_x - Del_CollisionBox.left;
+	CollisionBox.right = pos_x + Del_CollisionBox.right;
+	CollisionBox.top = pos_y - Del_CollisionBox.top;
+	CollisionBox.bottom = pos_y + Del_CollisionBox.bottom;
 }
 
 

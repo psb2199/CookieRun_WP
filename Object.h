@@ -31,6 +31,9 @@ public:
 	void AddObjectMovement(float del_x, float del_y);
 	void SetObjectLocation(float x, float y);
 	void SetCollisionBox(float l, float r, float t, float b);
+	
+private:
+	void UpdateCollisionBox();
 
 
 public:
@@ -54,5 +57,8 @@ public:
 	RectRange CollisionBox;
 
 	int ani_state;
+
+private:
+	RectRange Del_CollisionBox;
 };
 
