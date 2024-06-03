@@ -44,6 +44,9 @@ public:
 	float vel_x;
 	float vel_y;
 
+	int image_raw;
+	int image_col;
+
 	Object* next;
 	Object* prev;
 

@@ -27,9 +27,10 @@ struct KeyEventFlag {
 	bool right{ false };
 	bool left{ false };
 	bool enter{ false };
-
+	bool keyJ{ false };
 	bool KeyPlus{ false };
 	bool KeySubtract{ false };
+	bool KeySpace{ false };
 };
 KeyEventFlag KEY;
 void MouseLeftDownEvent(LPARAM lParam);
@@ -171,6 +172,7 @@ void Initialize() {
 	Player = ObjectMgr.AddObject("Cookie", ImageL.I_AngelCookie, 1, 100, 400);
 }
 
+
 void DrawObject(HDC mdc) {
 	ObjectMgr.DrawAll(mdc);
 }
@@ -190,9 +192,11 @@ void TickEvent() {
 
 void PlayerHandler() 
 {	
-	/*float speed{ 10.0 };
+	float speed{ 10.0 };
 	if (KEY.left) Player->AddObjectMovement(-speed, 0);
-	if (KEY.right) Player->AddObjectMovement(speed, 0);*/
+	if (KEY.right) Player->AddObjectMovement(speed, 0);
+	if (KEY.keyJ) Player->AddObjectMovement(0, -speed);
+	if (KEY.down) Player->AddObjectMovement(0, speed);
 }
 
 void KeyDownEvents(HWND hWnd, WPARAM wParam) {
@@ -202,6 +206,10 @@ void KeyDownEvents(HWND hWnd, WPARAM wParam) {
 
 	case VK_UP:
 		KEY.up = true;
+		break;
+	case 'J':
+	case 'j':
+		KEY.keyJ = true;
 		break;
 	case VK_DOWN:
 		KEY.down = true;
@@ -221,6 +229,11 @@ void KeyDownEvents(HWND hWnd, WPARAM wParam) {
 		break;
 	case VK_SUBTRACT:
 		KEY.KeySubtract = true;
+		break;
+	case VK_SPACE:
+		KEY.KeySpace = true;
+		Player->m_ElapseTime = 0;
+		Player->ani_state = ANI_jumping;
 		break;
 
 
@@ -249,12 +262,20 @@ void KeyUpEvents(HWND hWnd, WPARAM wParam) {
 	case VK_RETURN:
 		KEY.enter = false;
 		break;
+	case 'J':
+	case 'j':
+		KEY.keyJ = false;
+		break;
+
 
 	case VK_ADD:
 		KEY.KeyPlus = false;
 		break;
 	case VK_SUBTRACT:
 		KEY.KeySubtract = false;
+		break;
+	case VK_SPACE:
+		KEY.KeySpace = false;
 		break;
 	}
 	InvalidateRect(hWnd, NULL, false);

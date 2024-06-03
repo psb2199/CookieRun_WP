@@ -4,10 +4,6 @@
 
 #include "Grobal.h"
 
-#define ANI_idle 0
-#define ANI_running 1
-#define ANI_jumping 2
-
 Object::Object()
 {
 
@@ -23,6 +19,9 @@ Object::Object()
 		image.right = NULL;
 		image.bottom = NULL;
 		image.top = NULL;
+
+		image_raw = NULL;
+		image_col = NULL;
 
 		next = nullptr;
 		prev = nullptr;
@@ -46,8 +45,8 @@ void Object::DrawObjectImage(HDC mdc)
 
 		float animation_speed = 7;
 
-		int image_raw = 1;
-		int image_col = 4;
+		image_raw = 1;
+		image_col = 4;
 
 		if (ani_state == ANI_running)
 		{
@@ -57,24 +56,29 @@ void Object::DrawObjectImage(HDC mdc)
 		if (ani_state == ANI_jumping)
 		{
 			image_raw = 5;
-			image_col = 5;
+			image_col = 4;
 		}
 
-
 		int animation_time = floor(MyH::fract(m_ElapseTime * animation_speed) * image_col);
-		
+
+		if (ani_state == ANI_jumping && animation_time == 3)
+		{
+			ani_state = ANI_running;
+		}
+
 		//위치 확인용
-		//Draw::MakeCircle(mdc, pos_x - 5, pos_y - 5, pos_x + 5, pos_y + 5, RGB(255, 0, 0), 1, RGB(255, 0, 0));
-		//Draw::MakeRectangle(mdc, CollisionBox.left, CollisionBox.top, CollisionBox.right, CollisionBox.bottom, RGB(255, 0, 0), 1, 0);
+		// Draw::MakeCircle(mdc, pos_x - 5, pos_y - 5, pos_x + 5, pos_y + 5, RGB(255, 0, 0), 1, RGB(255, 0, 0));
+		Draw::MakeRectangle(mdc, CollisionBox.left, CollisionBox.top, CollisionBox.right, CollisionBox.bottom, RGB(255, 0, 0), 1, 0);
 
 		ObjectImage.Draw(mdc,
 			image.left, image.top, image.right - image.left, image.bottom - image.top, // x, y, 넓이, 높이,
 			line_size * animation_time + animation_time * sprite_size + 2, line_size * (image_raw + 1) + sprite_size * image_raw, sprite_size, sprite_size); // 이미지 내의 좌표
-	
+
+
 	}
 	else if (type == "BackGround")
 	{
-	
+
 
 		ObjectImage.Draw(mdc,
 			image.left, image.top, image.right - image.left, image.bottom - image.top, // x, y, 넓이, 높이,
