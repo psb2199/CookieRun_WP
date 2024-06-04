@@ -19,6 +19,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 void Initialize();
 void DrawObject(HDC mdc);
 void TickEvent();
+void SendCollisionEvent(Object* obj);
 void KeyDownEvents(HWND hWnd, WPARAM wParam);
 void KeyUpEvents(HWND hWnd, WPARAM wParam);
 struct KeyEventFlag {
@@ -188,6 +189,27 @@ void TickEvent() {
 	}
 
 	PlayerHandler();
+}
+
+void SendCollisionEvent(Object* obj)
+{
+	Object* ptr = ObjectMgr.GetAllObjects();
+
+	while (ptr != nullptr)
+	{
+		if (ptr != obj)
+		{
+			if (obj->CollisionBox.right > ptr->CollisionBox.left &&
+				obj->CollisionBox.left < ptr->CollisionBox.right &&
+				obj->CollisionBox.bottom > ptr->CollisionBox.top &&
+				obj->CollisionBox.top < ptr->CollisionBox.bottom)
+			{
+				
+			}
+		}
+
+		ptr = ptr->next;
+	}
 }
 
 void PlayerHandler() 
