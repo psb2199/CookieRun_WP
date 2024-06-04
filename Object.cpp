@@ -48,22 +48,67 @@ void Object::DrawObjectImage(HDC mdc)
 		image_raw = 1;
 		image_col = 4;
 
-		if (ani_state == ANI_running)
-		{
+		switch (ani_state) {
+		case ANI_running:
 			image_raw = 1;
 			image_col = 4;
-		}
-		if (ani_state == ANI_jumping)
-		{
+			break;
+		case ANI_jumping:
 			image_raw = 5;
 			image_col = 4;
+			break;
+		case ANI_double_jumping:
+			image_raw = 0;
+			image_col = 9;
+			break;
+		case ANI_sliding:
+			image_raw = 0;
+			image_col = 11;
+			break;
+		case ANI_sliding_up:
+			image_raw = 0;
+			image_col = 14;
+			break;
 		}
 
 		int animation_time = floor(MyH::fract(m_ElapseTime * animation_speed) * image_col);
 
-		if (ani_state == ANI_jumping && animation_time == 3)
-		{
-			ani_state = ANI_running;
+		switch (ani_state) {
+		case ANI_jumping:
+			if (count_jump == 2)
+			{
+				ani_state = ANI_double_jumping;
+				count_jump = 0;
+			}
+			else if (animation_time == 3)
+			{
+				ani_state = ANI_running;
+				count_jump = 0;
+			}
+			break;
+		case ANI_double_jumping:
+			if (animation_time == 8)
+			{
+				ani_state = ANI_running;
+			}
+			break;
+		case ANI_sliding:
+			if (animation_time % 2 == 0)
+				animation_time = 8;
+			else
+				animation_time = 9;
+			break;
+		case ANI_sliding_up:
+			if (animation_time < 10)
+			{
+				animation_time = 10;
+				ani_state = ANI_running;
+			}
+			if (animation_time == 13)
+			{
+				ani_state = ANI_running;
+			}
+			break;
 		}
 
 		//위치 확인용
@@ -76,14 +121,13 @@ void Object::DrawObjectImage(HDC mdc)
 
 
 	}
-	else if (type == "BackGround")
+	else if (type == "BackGround" || type == "BackGround2")
 	{
-
-
 		ObjectImage.Draw(mdc,
 			image.left, image.top, image.right - image.left, image.bottom - image.top, // x, y, 넓이, 높이,
 			0, 0, ObjectImage.GetWidth(), ObjectImage.GetHeight());
 	}
+
 	else
 	{
 		ObjectImage.Draw(mdc,
@@ -101,13 +145,15 @@ void Object::BeginEvents()
 	if (type == "Cookie")
 	{
 		float m_size = 100;
+		original_y = pos_y;
 		SetObjectVertexLocation(pos_x - m_size * size, pos_y - m_size * size, pos_x + m_size * size, pos_y + m_size * size);
 
 		SetCollisionBox(m_size / 2 * size, m_size / 2 * size, 0 * size, m_size * size);
 
 		ani_state = ANI_running;
+		count_jump = 0;
 	}
-	else if (type == "BackGround")
+	else if (type == "BackGround" || type == "BackGround2")
 	{
 		float h = ObjectImage.GetHeight();
 		float ratio = WINDOW_HEIGHT / h;
@@ -127,7 +173,12 @@ void Object::TickEvents()
 
 	if (type == "BackGround")
 	{
-		float speed = 2;
+		float speed = 5;
+		AddObjectMovement(-speed, 0);
+	}
+	else if (type == "BackGround2")
+	{
+		float speed = 1;
 		AddObjectMovement(-speed, 0);
 	}
 }
@@ -210,6 +261,19 @@ void Object::SetCollisionBox(float l, float r, float t, float b)
 	Del_CollisionBox.right = r;
 	Del_CollisionBox.top = t;
 	Del_CollisionBox.bottom = b;
+}
+
+void Object::DoJump()
+{
+	int jump_height = 1000;
+	int falling_time = 1;
+	int speed = 5;
+	float jumping_time = m_ElapseTime * speed;
+	pos_y = jump_height * jumping_time * (jumping_time - falling_time) + original_y;
+	if (jumping_time >= falling_time) {
+		jumping_time = 0;
+		isJumping = false;
+	}
 }
 
 void Object::UpdateCollisionBox()

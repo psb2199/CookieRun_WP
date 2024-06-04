@@ -143,6 +143,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		TransparentBlt(hDC, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, mDC, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, RGB(0, 0, 0));
 		InvalidateRect(hWnd, NULL, FALSE);
 
+		DeleteObject(hBitmap);
 		DeleteDC(mDC);
 		DeleteDC(hDC);
 		ReleaseDC(hWnd, hDC);
@@ -167,9 +168,9 @@ void Initialize() {
 	ObjectMgr.DeleteAll();
 	ImageL.LoadAllImage();
 
-	
+	ObjectMgr.AddObject("BackGround2", ImageL.I_BackGround2, 1, 0, 0);
 	ObjectMgr.AddObject("BackGround", ImageL.I_BackGround, 1, 0, 0);
-	Player = ObjectMgr.AddObject("Cookie", ImageL.I_AngelCookie, 1, 100, 400);
+	Player = ObjectMgr.AddObject("Cookie", ImageL.I_AngelCookie, 1, 170, 400);
 }
 
 
@@ -190,13 +191,14 @@ void TickEvent() {
 	PlayerHandler();
 }
 
-void PlayerHandler() 
-{	
+void PlayerHandler()
+{
 	float speed{ 10.0 };
 	if (KEY.left) Player->AddObjectMovement(-speed, 0);
 	if (KEY.right) Player->AddObjectMovement(speed, 0);
 	if (KEY.keyJ) Player->AddObjectMovement(0, -speed);
-	if (KEY.down) Player->AddObjectMovement(0, speed);
+	// if (KEY.down) Player->AddObjectMovement(0, speed);
+	if (Player->isJumping == true) Player->DoJump();
 }
 
 void KeyDownEvents(HWND hWnd, WPARAM wParam) {
@@ -212,7 +214,8 @@ void KeyDownEvents(HWND hWnd, WPARAM wParam) {
 		KEY.keyJ = true;
 		break;
 	case VK_DOWN:
-		KEY.down = true;
+		Player->m_ElapseTime = 0;
+		Player->ani_state = ANI_sliding;
 		break;
 	case VK_LEFT:
 		KEY.left = true;
@@ -233,7 +236,9 @@ void KeyDownEvents(HWND hWnd, WPARAM wParam) {
 	case VK_SPACE:
 		KEY.KeySpace = true;
 		Player->m_ElapseTime = 0;
+		Player->isJumping = true;
 		Player->ani_state = ANI_jumping;
+		Player->count_jump += 1;
 		break;
 
 
@@ -251,7 +256,8 @@ void KeyUpEvents(HWND hWnd, WPARAM wParam) {
 		KEY.up = false;
 		break;
 	case VK_DOWN:
-		KEY.down = false;
+		Player->m_ElapseTime = 0;
+		Player->ani_state = ANI_sliding_up;
 		break;
 	case VK_LEFT:
 		KEY.left = false;
