@@ -148,14 +148,11 @@ void Object::CollisionEvent(Object* byWhat)
 {
 	if (byWhat)
 	{
-
-
-
-		ani_state = ANI_jumping;
+		
 	}
 	else
 	{
-		ani_state = ANI_running;
+		
 	}
 
 }

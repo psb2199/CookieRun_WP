@@ -238,11 +238,6 @@ void KeyDownEvents(HWND hWnd, WPARAM wParam) {
 	case VK_UP:
 		KEY.up = true;
 		break;
-	case 'J':
-	case 'j':
-		if (DeBugMode) DeBugMode = false;
-		else DeBugMode = true;
-		break;
 	case VK_DOWN:
 		KEY.down = true;
 		break;
@@ -252,6 +247,7 @@ void KeyDownEvents(HWND hWnd, WPARAM wParam) {
 	case VK_RIGHT:
 		KEY.right = true;
 		break;
+
 	case VK_RETURN:
 		KEY.enter = true;
 		break;
@@ -268,6 +264,11 @@ void KeyDownEvents(HWND hWnd, WPARAM wParam) {
 		Player->ani_state = ANI_jumping;
 		break;
 
+	case 'J':
+	case 'j':
+		if (DeBugMode) DeBugMode = false;
+		else DeBugMode = true;
+		break;
 
 	case 'Q':
 	case 'q':
