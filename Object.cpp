@@ -23,6 +23,7 @@ Object::Object()
 		image_raw = NULL;
 		image_col = NULL;
 
+
 		next = nullptr;
 		prev = nullptr;
 	}
@@ -66,15 +67,19 @@ void Object::DrawObjectImage(HDC mdc)
 			ani_state = ANI_running;
 		}
 
-		//위치 확인용
-		// Draw::MakeCircle(mdc, pos_x - 5, pos_y - 5, pos_x + 5, pos_y + 5, RGB(255, 0, 0), 1, RGB(255, 0, 0));
-		Draw::MakeRectangle(mdc, CollisionBox.left, CollisionBox.top, CollisionBox.right, CollisionBox.bottom, RGB(255, 0, 0), 1, 0);
+	
 
 		ObjectImage.Draw(mdc,
 			image.left, image.top, image.right - image.left, image.bottom - image.top, // x, y, 넓이, 높이,
 			line_size * animation_time + animation_time * sprite_size + 2, line_size * (image_raw + 1) + sprite_size * image_raw, sprite_size, sprite_size); // 이미지 내의 좌표
 
 
+	}
+	else if (type == "Ground")
+	{
+		ObjectImage.Draw(mdc,
+			image.left, image.top, image.right - image.left, image.bottom - image.top, // x, y, 넓이, 높이,
+			0, 0, ObjectImage.GetWidth(), ObjectImage.GetHeight());
 	}
 	else if (type == "BackGround")
 	{
@@ -91,6 +96,13 @@ void Object::DrawObjectImage(HDC mdc)
 			0, 0, ObjectImage.GetWidth(), ObjectImage.GetHeight());
 	}
 
+	if (DebugMode)
+	{
+		//위치 확인용
+		Draw::MakeCircle(mdc, pos_x - 5, pos_y - 5, pos_x + 5, pos_y + 5, RGB(0, 0, 255), 1, RGB(255, 0, 0));
+		Draw::MakeDebugRectangle(mdc, image.left, image.top, image.right, image.bottom, RGB(0, 255, 0), 1);
+		Draw::MakeDebugRectangle(mdc, CollisionBox.left, CollisionBox.top, CollisionBox.right, CollisionBox.bottom, RGB(255, 0, 0), 1);
+	}
 
 }
 
@@ -116,7 +128,7 @@ void Object::BeginEvents()
 	}
 	else
 	{
-		SetObjectVertexLocation(0, 0, ObjectImage.GetWidth(), ObjectImage.GetHeight());
+		SetCollisionBox(ObjectImage.GetWidth() / 2, ObjectImage.GetWidth() / 2, ObjectImage.GetHeight() / 2, ObjectImage.GetHeight() / 2);
 	}
 }
 
@@ -130,6 +142,22 @@ void Object::TickEvents()
 		float speed = 2;
 		AddObjectMovement(-speed, 0);
 	}
+}
+
+void Object::CollisionEvent(Object* byWhat)
+{
+	if (byWhat)
+	{
+
+
+
+		ani_state = ANI_jumping;
+	}
+	else
+	{
+		ani_state = ANI_running;
+	}
+
 }
 
 
@@ -210,6 +238,11 @@ void Object::SetCollisionBox(float l, float r, float t, float b)
 	Del_CollisionBox.right = r;
 	Del_CollisionBox.top = t;
 	Del_CollisionBox.bottom = b;
+}
+
+void Object::SetDebugMode(bool value)
+{
+	DebugMode = value;
 }
 
 void Object::UpdateCollisionBox()

@@ -12,5 +12,6 @@ public:
 
 	CImage I_AngelCookie;
 	CImage I_BackGround;
+	CImage I_Ground;
 };
 

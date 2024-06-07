@@ -24,6 +24,13 @@ void Draw::MakeCircle(HDC mDC, float x1, float y1, float x2, float y2, COLORREF 
 	hPen = (HPEN)SelectObject(mDC, oldpen); // 새로운 펜 선택하기
 	DeleteObject(hPen);
 }
+void Draw::MakeDebugRectangle(HDC mDC, float x1, float y1, float x2, float y2, COLORREF incolor, int outlinethickness)
+{
+	MakeLine(mDC, x1, y1, x1, y2, incolor, outlinethickness, PS_SOLID);
+	MakeLine(mDC, x1, y2, x2, y2, incolor, outlinethickness, PS_SOLID);
+	MakeLine(mDC, x2, y2, x2, y1, incolor, outlinethickness, PS_SOLID);
+	MakeLine(mDC, x2, y1, x1, y1, incolor, outlinethickness, PS_SOLID);
+}
 void Draw::MakeLine(HDC mDC, float x1, float y1, float x2, float y2, COLORREF incolor, int outlinethickness, int style)
 {
 	HPEN hPen = CreatePen(style, outlinethickness, incolor);

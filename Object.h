@@ -21,6 +21,7 @@ public:
 	~Object();
 	void BeginEvents();
 	void TickEvents();
+	void CollisionEvent(Object* byWhat);
 
 	void DrawObject(HDC m_mDC);
 	void DrawObjectImage(HDC mdc);
@@ -31,10 +32,11 @@ public:
 	void AddObjectMovement(float del_x, float del_y);
 	void SetObjectLocation(float x, float y);
 	void SetCollisionBox(float l, float r, float t, float b);
+	void SetDebugMode(bool value);
 	
 private:
 	void UpdateCollisionBox();
-
+	bool DebugMode{ false };
 
 public:
 	std::string type;
@@ -54,6 +56,7 @@ public:
 	Object* prev;
 
 	RectRange image; //이미지의 (x1, y1) , (x2, y2)의 좌표
+	
 	RectRange CollisionBox;
 
 	int ani_state;

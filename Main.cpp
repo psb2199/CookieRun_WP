@@ -19,7 +19,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 void Initialize();
 void DrawObject(HDC mdc);
 void TickEvent();
-void SendCollisionEvent(Object* obj);
+void CheckCollision(Object* obj);
 void KeyDownEvents(HWND hWnd, WPARAM wParam);
 void KeyUpEvents(HWND hWnd, WPARAM wParam);
 struct KeyEventFlag {
@@ -50,6 +50,7 @@ MouseEventFlag MOUSE;
 ImageLoader ImageL;
 ObjectManager ObjectMgr;
 Object* Player;
+bool DeBugMode{ false };
 void PlayerHandler();
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdParam, int nCmdShow) {
@@ -171,6 +172,7 @@ void Initialize() {
 	
 	ObjectMgr.AddObject("BackGround", ImageL.I_BackGround, 1, 0, 0);
 	Player = ObjectMgr.AddObject("Cookie", ImageL.I_AngelCookie, 1, 100, 400);
+	ObjectMgr.AddObject("Ground", ImageL.I_Ground, 1, 500, 400);
 }
 
 
@@ -184,6 +186,8 @@ void TickEvent() {
 	while (ptr != nullptr)
 	{
 		ptr->TickEvents();
+		CheckCollision(ptr);
+		ptr->SetDebugMode(DeBugMode);
 		ptr->m_ElapseTime += DELTA_TIME;
 		ptr = ptr->next;
 	}
@@ -191,9 +195,11 @@ void TickEvent() {
 	PlayerHandler();
 }
 
-void SendCollisionEvent(Object* obj)
+void CheckCollision(Object* obj)
 {
 	Object* ptr = ObjectMgr.GetAllObjects();
+
+	bool FlagCollision{ false };
 
 	while (ptr != nullptr)
 	{
@@ -204,12 +210,15 @@ void SendCollisionEvent(Object* obj)
 				obj->CollisionBox.bottom > ptr->CollisionBox.top &&
 				obj->CollisionBox.top < ptr->CollisionBox.bottom)
 			{
-				
+				FlagCollision = true;
+				obj->CollisionEvent(ptr);
 			}
 		}
 
 		ptr = ptr->next;
 	}
+
+	if(!FlagCollision) obj->CollisionEvent(nullptr);
 }
 
 void PlayerHandler() 
@@ -217,7 +226,7 @@ void PlayerHandler()
 	float speed{ 10.0 };
 	if (KEY.left) Player->AddObjectMovement(-speed, 0);
 	if (KEY.right) Player->AddObjectMovement(speed, 0);
-	if (KEY.keyJ) Player->AddObjectMovement(0, -speed);
+	if (KEY.up) Player->AddObjectMovement(0, -speed);
 	if (KEY.down) Player->AddObjectMovement(0, speed);
 }
 
@@ -231,7 +240,8 @@ void KeyDownEvents(HWND hWnd, WPARAM wParam) {
 		break;
 	case 'J':
 	case 'j':
-		KEY.keyJ = true;
+		if (DeBugMode) DeBugMode = false;
+		else DeBugMode = true;
 		break;
 	case VK_DOWN:
 		KEY.down = true;
