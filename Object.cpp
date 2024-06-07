@@ -1,5 +1,7 @@
 #include "Object.h"
+#include "ObjectManager.h"
 #include "MyH.h"
+#include "ImageLoader.h"
 #include <iostream>
 
 #include "Grobal.h"
@@ -22,7 +24,6 @@ Object::Object()
 
 		image_raw = NULL;
 		image_col = NULL;
-
 
 		next = nullptr;
 		prev = nullptr;
@@ -49,25 +50,72 @@ void Object::DrawObjectImage(HDC mdc)
 		image_raw = 1;
 		image_col = 4;
 
-		if (ani_state == ANI_running)
-		{
+		switch (ani_state) {
+		case ANI_running:
 			image_raw = 1;
 			image_col = 4;
-		}
-		if (ani_state == ANI_jumping)
-		{
+			break;
+		case ANI_jumping:
 			image_raw = 5;
 			image_col = 4;
+			break;
+		case ANI_double_jumping:
+			image_raw = 0;
+			image_col = 9;
+			break;
+		case ANI_sliding:
+			image_raw = 0;
+			image_col = 11;
+			break;
+		case ANI_sliding_up:
+			image_raw = 0;
+			image_col = 14;
+			break;
 		}
 
 		int animation_time = floor(MyH::fract(m_ElapseTime * animation_speed) * image_col);
 
-		if (ani_state == ANI_jumping && animation_time == 3)
-		{
-			ani_state = ANI_running;
+		switch (ani_state) {
+		case ANI_jumping:
+			if (count_jump == 2 && animation_time == 3)
+			{
+				ani_state = ANI_double_jumping;
+				count_jump = 0;
+			}
+			else if (animation_time == 3)
+			{
+				ani_state = ANI_running;
+				count_jump = 0;
+			}
+			break;
+		case ANI_double_jumping:
+			if (animation_time == 8)
+			{
+				ani_state = ANI_running;
+			}
+			break;
+		case ANI_sliding:
+			if (animation_time % 2 == 0)
+				animation_time = 8;
+			else
+				animation_time = 9;
+			break;
+		case ANI_sliding_up:
+			if (animation_time < 10)
+			{
+				animation_time = 10;
+				ani_state = ANI_running;
+			}
+			if (animation_time == 13)
+			{
+				ani_state = ANI_running;
+			}
+			break;
 		}
 
-	
+		//위치 확인용
+		// Draw::MakeCircle(mdc, pos_x - 5, pos_y - 5, pos_x + 5, pos_y + 5, RGB(255, 0, 0), 1, RGB(255, 0, 0));
+		//Draw::MakeRectangle(mdc, CollisionBox.left, CollisionBox.top, CollisionBox.right, CollisionBox.bottom, RGB(255, 0, 0), 1, 0);
 
 		ObjectImage.Draw(mdc,
 			image.left, image.top, image.right - image.left, image.bottom - image.top, // x, y, 넓이, 높이,
@@ -75,16 +123,8 @@ void Object::DrawObjectImage(HDC mdc)
 
 
 	}
-	else if (type == "Ground")
+	else if (type == "BackGround" || type == "BackGround2")
 	{
-		ObjectImage.Draw(mdc,
-			image.left, image.top, image.right - image.left, image.bottom - image.top, // x, y, 넓이, 높이,
-			0, 0, ObjectImage.GetWidth(), ObjectImage.GetHeight());
-	}
-	else if (type == "BackGround")
-	{
-
-
 		ObjectImage.Draw(mdc,
 			image.left, image.top, image.right - image.left, image.bottom - image.top, // x, y, 넓이, 높이,
 			0, 0, ObjectImage.GetWidth(), ObjectImage.GetHeight());
@@ -96,13 +136,6 @@ void Object::DrawObjectImage(HDC mdc)
 			0, 0, ObjectImage.GetWidth(), ObjectImage.GetHeight());
 	}
 
-	if (DebugMode)
-	{
-		//위치 확인용
-		Draw::MakeCircle(mdc, pos_x - 5, pos_y - 5, pos_x + 5, pos_y + 5, RGB(0, 0, 255), 1, RGB(255, 0, 0));
-		Draw::MakeDebugRectangle(mdc, image.left, image.top, image.right, image.bottom, RGB(0, 255, 0), 1);
-		Draw::MakeDebugRectangle(mdc, CollisionBox.left, CollisionBox.top, CollisionBox.right, CollisionBox.bottom, RGB(255, 0, 0), 1);
-	}
 
 }
 
@@ -112,23 +145,44 @@ void Object::BeginEvents()
 
 	if (type == "Cookie")
 	{
-		float m_size = 100;
+		float m_size = 140;
+		original_y = pos_y;
 		SetObjectVertexLocation(pos_x - m_size * size, pos_y - m_size * size, pos_x + m_size * size, pos_y + m_size * size);
 
 		SetCollisionBox(m_size / 2 * size, m_size / 2 * size, 0 * size, m_size * size);
 
 		ani_state = ANI_running;
+		count_jump = 0;
 	}
-	else if (type == "BackGround")
+	else if (type == "BackGround" || type == "BackGround2")
 	{
 		float h = ObjectImage.GetHeight();
 		float ratio = WINDOW_HEIGHT / h;
 
-		SetObjectVertexLocation(0, 0, WINDOW_WIDTH * ratio, WINDOW_HEIGHT);
+		SetObjectVertexLocation(pos_x, pos_y, pos_x + WINDOW_WIDTH * ratio, pos_y + WINDOW_HEIGHT);
+	}
+	else if (type == "Bridge")
+	{
+		float m_size = 60;
+		SetObjectVertexLocation(pos_x - m_size * size, pos_y - m_size * size, pos_x + m_size * size, pos_y + m_size * size);
+	}
+	else if (type == "Jump")
+	{
+		float ratio1 = ObjectImage.GetWidth() / 1.6;
+		float ratio2 = ObjectImage.GetHeight() / 1.6;
+		SetObjectVertexLocation(pos_x, pos_y, pos_x + ratio1, pos_y + ratio2);
+	}
+	else if (type == "Jelly")
+	{
+		float ratio1 = ObjectImage.GetWidth() / 1.6;
+		float ratio2 = ObjectImage.GetHeight() / 1.6;
+		SetObjectVertexLocation(pos_x, pos_y, pos_x + ratio1, pos_y + ratio2);
 	}
 	else
 	{
-		SetCollisionBox(ObjectImage.GetWidth() / 2, ObjectImage.GetWidth() / 2, ObjectImage.GetHeight() / 2, ObjectImage.GetHeight() / 2);
+		float ratio1 = ObjectImage.GetWidth() / 1.2;
+		float ratio2 = ObjectImage.GetHeight() / 1.2;
+		SetObjectVertexLocation(pos_x, pos_y, pos_x + ratio1, pos_y + ratio2);
 	}
 }
 
@@ -139,29 +193,25 @@ void Object::TickEvents()
 
 	if (type == "BackGround")
 	{
+		float speed = 6;
+		AddObjectMovement(-speed, 0);
+	}
+	else if (type == "BackGround2")
+	{
 		float speed = 2;
 		AddObjectMovement(-speed, 0);
 	}
-}
-
-void Object::CollisionEvent(Object* byWhat)
-{
-	if (byWhat)
+	else if (type == "Bridge" || type == "Sliding1" || type == "Jump" || type == "Jelly")
 	{
-		
+		float speed = 6;
+		AddObjectMovement(-speed, 0);
 	}
-	else
-	{
-		
-	}
-
 }
 
 
 
 void Object::DrawObject(HDC m_mDC)
 {
-
 }
 
 float Object::GetDirectaion()
@@ -237,9 +287,17 @@ void Object::SetCollisionBox(float l, float r, float t, float b)
 	Del_CollisionBox.bottom = b;
 }
 
-void Object::SetDebugMode(bool value)
+void Object::DoJump()
 {
-	DebugMode = value;
+	int jump_height = 1000;
+	int falling_time = 1;
+	int speed = 5;
+	float jumping_time = m_ElapseTime * speed;
+	pos_y = jump_height * jumping_time * (jumping_time - falling_time) + original_y;
+	if (jumping_time >= falling_time) {
+		jumping_time = 0;
+		isJumping = false;
+	}
 }
 
 void Object::UpdateCollisionBox()
