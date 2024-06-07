@@ -9,3 +9,10 @@
 #define ANI_double_jumping 3
 #define ANI_sliding 4
 #define ANI_sliding_up 5
+
+// type 
+#define Cookie 1
+#define Background 2
+#define Background2 3
+
+#define Bridge_width 120

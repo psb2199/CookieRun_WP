@@ -1,5 +1,7 @@
 #include "Object.h"
+#include "ObjectManager.h"
 #include "MyH.h"
+#include "ImageLoader.h"
 #include <iostream>
 
 #include "Grobal.h"
@@ -75,7 +77,7 @@ void Object::DrawObjectImage(HDC mdc)
 
 		switch (ani_state) {
 		case ANI_jumping:
-			if (count_jump == 2)
+			if (count_jump == 2 && animation_time == 3)
 			{
 				ani_state = ANI_double_jumping;
 				count_jump = 0;
@@ -113,7 +115,7 @@ void Object::DrawObjectImage(HDC mdc)
 
 		//위치 확인용
 		// Draw::MakeCircle(mdc, pos_x - 5, pos_y - 5, pos_x + 5, pos_y + 5, RGB(255, 0, 0), 1, RGB(255, 0, 0));
-		Draw::MakeRectangle(mdc, CollisionBox.left, CollisionBox.top, CollisionBox.right, CollisionBox.bottom, RGB(255, 0, 0), 1, 0);
+		//Draw::MakeRectangle(mdc, CollisionBox.left, CollisionBox.top, CollisionBox.right, CollisionBox.bottom, RGB(255, 0, 0), 1, 0);
 
 		ObjectImage.Draw(mdc,
 			image.left, image.top, image.right - image.left, image.bottom - image.top, // x, y, 넓이, 높이,
@@ -127,7 +129,6 @@ void Object::DrawObjectImage(HDC mdc)
 			image.left, image.top, image.right - image.left, image.bottom - image.top, // x, y, 넓이, 높이,
 			0, 0, ObjectImage.GetWidth(), ObjectImage.GetHeight());
 	}
-
 	else
 	{
 		ObjectImage.Draw(mdc,
@@ -144,7 +145,7 @@ void Object::BeginEvents()
 
 	if (type == "Cookie")
 	{
-		float m_size = 100;
+		float m_size = 140;
 		original_y = pos_y;
 		SetObjectVertexLocation(pos_x - m_size * size, pos_y - m_size * size, pos_x + m_size * size, pos_y + m_size * size);
 
@@ -158,11 +159,30 @@ void Object::BeginEvents()
 		float h = ObjectImage.GetHeight();
 		float ratio = WINDOW_HEIGHT / h;
 
-		SetObjectVertexLocation(0, 0, WINDOW_WIDTH * ratio, WINDOW_HEIGHT);
+		SetObjectVertexLocation(pos_x, pos_y, pos_x + WINDOW_WIDTH * ratio, pos_y + WINDOW_HEIGHT);
+	}
+	else if (type == "Bridge")
+	{
+		float m_size = 60;
+		SetObjectVertexLocation(pos_x - m_size * size, pos_y - m_size * size, pos_x + m_size * size, pos_y + m_size * size);
+	}
+	else if (type == "Jump")
+	{
+		float ratio1 = ObjectImage.GetWidth() / 1.6;
+		float ratio2 = ObjectImage.GetHeight() / 1.6;
+		SetObjectVertexLocation(pos_x, pos_y, pos_x + ratio1, pos_y + ratio2);
+	}
+	else if (type == "Jelly")
+	{
+		float ratio1 = ObjectImage.GetWidth() / 1.6;
+		float ratio2 = ObjectImage.GetHeight() / 1.6;
+		SetObjectVertexLocation(pos_x, pos_y, pos_x + ratio1, pos_y + ratio2);
 	}
 	else
 	{
-		SetObjectVertexLocation(0, 0, ObjectImage.GetWidth(), ObjectImage.GetHeight());
+		float ratio1 = ObjectImage.GetWidth() / 1.2;
+		float ratio2 = ObjectImage.GetHeight() / 1.2;
+		SetObjectVertexLocation(pos_x, pos_y, pos_x + ratio1, pos_y + ratio2);
 	}
 }
 
@@ -173,12 +193,17 @@ void Object::TickEvents()
 
 	if (type == "BackGround")
 	{
-		float speed = 5;
+		float speed = 6;
 		AddObjectMovement(-speed, 0);
 	}
 	else if (type == "BackGround2")
 	{
-		float speed = 1;
+		float speed = 2;
+		AddObjectMovement(-speed, 0);
+	}
+	else if (type == "Bridge" || type == "Sliding1" || type == "Jump" || type == "Jelly")
+	{
+		float speed = 6;
 		AddObjectMovement(-speed, 0);
 	}
 }
@@ -187,7 +212,6 @@ void Object::TickEvents()
 
 void Object::DrawObject(HDC m_mDC)
 {
-
 }
 
 float Object::GetDirectaion()
