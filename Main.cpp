@@ -2,6 +2,7 @@
 #include <tchar.h>
 #include <iostream>
 #include <string>
+#include <fstream>
 #include "Grobal.h"
 
 #include "MyH.h"
@@ -49,9 +50,14 @@ MouseEventFlag MOUSE;
 
 ImageLoader ImageL;
 ObjectManager ObjectMgr;
+
 Object* Player;
 bool DeBugMode{ false };
 void PlayerHandler();
+void MakeBridge();
+void MakeBackGround1();
+void MakeBackGround2();
+void MakeObstacles();
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdParam, int nCmdShow) {
 	HWND hWnd;
@@ -137,17 +143,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		mDC = CreateCompatibleDC(hDC);
 		(HBITMAP)SelectObject(mDC, hBitmap);
 
-
 		DrawObject(mDC);
-
 
 		BitBlt(hDC, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, mDC, 0, 0, SRCCOPY);
 		TransparentBlt(hDC, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, mDC, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, RGB(0, 0, 0));
-		InvalidateRect(hWnd, NULL, FALSE);
 
+		DeleteObject(hBitmap);
 		DeleteDC(mDC);
 		DeleteDC(hDC);
-		ReleaseDC(hWnd, hDC);
+
+		EndPaint(hWnd, &ps);
 
 		break;
 
@@ -169,10 +174,12 @@ void Initialize() {
 	ObjectMgr.DeleteAll();
 	ImageL.LoadAllImage();
 
-	
-	ObjectMgr.AddObject("BackGround", ImageL.I_BackGround, 1, 0, 0);
-	Player = ObjectMgr.AddObject("Cookie", ImageL.I_AngelCookie, 1, 100, 400);
-	ObjectMgr.AddObject("Ground", ImageL.I_Ground, 1, 500, 400);
+	MakeBackGround2();
+	MakeBackGround1();
+	MakeObstacles();
+	MakeBridge();
+	Player = ObjectMgr.AddObject("Cookie", ImageL.I_AngelCookie, 1, 200, 350);
+
 }
 
 
@@ -195,16 +202,59 @@ void TickEvent() {
 	PlayerHandler();
 }
 
-
-
-void PlayerHandler() 
-{	
+void PlayerHandler()
+{
 	float speed{ 10.0 };
 	if (KEY.left) Player->AddObjectMovement(-speed, 0);
 	if (KEY.right) Player->AddObjectMovement(speed, 0);
-	if (KEY.up) Player->AddObjectMovement(0, -speed);
-	if (KEY.down) Player->AddObjectMovement(0, speed);
+	if (KEY.keyJ) Player->AddObjectMovement(0, -speed);
+	// if (KEY.down) Player->AddObjectMovement(0, speed);
+	if (Player->isJumping == true) Player->DoJump();
 }
+
+void MakeBridge()
+{
+	std::ifstream ifs;
+	ifs.open("Bridge.txt");
+	int pos_x{};
+	while (ifs >> pos_x) {
+		ObjectMgr.AddObject("Bridge", ImageL.I_Bridge1, 1, pos_x, 550);
+		//ObjectMgr.AddObject("Jelly", ImageL.I_CommonJelly, 1, pos_x-30, 430);
+		//ObjectMgr.AddObject("Jump", ImageL.I_jp1A, 1, pos_x - 30, 410);
+		//ObjectMgr.AddObject("Jump", ImageL.I_jp2A, 1, pos_x - 40, 340);
+		ObjectMgr.AddObject("Jump", ImageL.I_jp2B, 1, pos_x - 40, 340);
+	}
+}
+
+void MakeObstacles()
+{
+	std::ifstream ifs;
+	ifs.open("Sliding1.txt");
+	int pos_x{};
+
+	while (ifs >> pos_x) {
+		ObjectMgr.AddObject("Sliding1", ImageL.I_Sd1, 1, pos_x, 0);
+	}
+
+
+}
+
+void MakeBackGround1()
+{
+	float h = ImageL.I_BackGround.GetHeight();
+	float ratio = WINDOW_HEIGHT / h;
+	for (int i = 0; i < 20; ++i)
+		ObjectMgr.AddObject("BackGround", ImageL.I_BackGround, 1, WINDOW_WIDTH * ratio * i, 0);
+}
+
+void MakeBackGround2()
+{
+	float h = ImageL.I_BackGround2.GetHeight();
+	float ratio = WINDOW_HEIGHT / h;
+	for (int i = 0; i < 7; ++i)
+		ObjectMgr.AddObject("BackGround2", ImageL.I_BackGround2, 1, WINDOW_WIDTH * ratio * i, 0);
+}
+
 
 void KeyDownEvents(HWND hWnd, WPARAM wParam) {
 	Object* ptr = ObjectMgr.GetAllObjects();
@@ -220,7 +270,8 @@ void KeyDownEvents(HWND hWnd, WPARAM wParam) {
 		else DeBugMode = true;
 		break;
 	case VK_DOWN:
-		KEY.down = true;
+		//Player->m_ElapseTime = 0;
+		Player->ani_state = ANI_sliding;
 		break;
 	case VK_LEFT:
 		KEY.left = true;
@@ -241,7 +292,9 @@ void KeyDownEvents(HWND hWnd, WPARAM wParam) {
 	case VK_SPACE:
 		KEY.KeySpace = true;
 		Player->m_ElapseTime = 0;
+		Player->isJumping = true;
 		Player->ani_state = ANI_jumping;
+		Player->count_jump += 1;
 		break;
 
 
@@ -259,7 +312,8 @@ void KeyUpEvents(HWND hWnd, WPARAM wParam) {
 		KEY.up = false;
 		break;
 	case VK_DOWN:
-		KEY.down = false;
+		Player->m_ElapseTime = 0;
+		Player->ani_state = ANI_sliding_up;
 		break;
 	case VK_LEFT:
 		KEY.left = false;

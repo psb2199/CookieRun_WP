@@ -32,7 +32,7 @@ public:
 	void AddObjectMovement(float del_x, float del_y);
 	void SetObjectLocation(float x, float y);
 	void SetCollisionBox(float l, float r, float t, float b);
-	void SetDebugMode(bool value);
+	void DoJump();
 	
 private:
 	void UpdateCollisionBox();
@@ -48,9 +48,12 @@ public:
 	float m_ElapseTime;
 	float vel_x;
 	float vel_y;
+	float original_y;
 
 	int image_raw;
 	int image_col;
+
+	bool isJumping{ false };
 
 	Object* next;
 	Object* prev;
@@ -60,6 +63,7 @@ public:
 	RectRange CollisionBox;
 
 	int ani_state;
+	int count_jump;
 
 private:
 	RectRange Del_CollisionBox;
