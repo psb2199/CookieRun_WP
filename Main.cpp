@@ -110,6 +110,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		SetTimer(hWnd, 1, DELTA_TIME * 1000, NULL);
 		break;
 
+	case WM_CHAR:
+		break;
+
 	case WM_KEYDOWN:
 		KeyDownEvents(hWnd, wParam);
 		break;
@@ -192,10 +195,14 @@ void TickEvent() {
 
 	while (ptr != nullptr)
 	{
-		ptr->TickEvents();
-		CheckCollision(ptr);
-		ptr->SetDebugMode(DeBugMode);
-		ptr->m_ElapseTime += DELTA_TIME;
+		if (ptr->pos_x > -1000)
+		{
+			ptr->TickEvents();
+			CheckCollision(ptr);
+			ptr->SetDebugMode(DeBugMode);
+			ptr->m_ElapseTime += DELTA_TIME;
+		}
+		
 		ptr = ptr->next;
 	}
 
@@ -208,7 +215,10 @@ void PlayerHandler()
 	if (KEY.left) Player->AddObjectMovement(-speed, 0);
 	if (KEY.right) Player->AddObjectMovement(speed, 0);
 	if (KEY.keyJ) Player->AddObjectMovement(0, -speed);
-	// if (KEY.down) Player->AddObjectMovement(0, speed);
+	if (KEY.down) 
+	{
+		Player->ani_state = ANI_sliding;
+	}
 	if (Player->isJumping == true) Player->DoJump();
 }
 
@@ -224,6 +234,11 @@ void MakeBridge()
 		//ObjectMgr.AddObject("Jump", ImageL.I_jp2A, 1, pos_x - 40, 340);
 		ObjectMgr.AddObject("Jump", ImageL.I_jp2B, 1, pos_x - 40, 340);
 	}
+
+	//for (int i{ 0 }; i < 300; ++i)
+	//{
+	//	ObjectMgr.AddObject("Jump", ImageL.I_jp2B, 1, i * 300, 340);
+	//}
 }
 
 void MakeObstacles()
@@ -264,21 +279,19 @@ void KeyDownEvents(HWND hWnd, WPARAM wParam) {
 	case VK_UP:
 		KEY.up = true;
 		break;
-	case 'J':
-	case 'j':
-		if (DeBugMode) DeBugMode = false;
-		else DeBugMode = true;
-		break;
+
 	case VK_DOWN:
-		//Player->m_ElapseTime = 0;
-		Player->ani_state = ANI_sliding;
+		KEY.down = true;
 		break;
+
 	case VK_LEFT:
 		KEY.left = true;
 		break;
+
 	case VK_RIGHT:
 		KEY.right = true;
 		break;
+
 	case VK_RETURN:
 		KEY.enter = true;
 		break;
@@ -297,6 +310,11 @@ void KeyDownEvents(HWND hWnd, WPARAM wParam) {
 		Player->count_jump += 1;
 		break;
 
+	case 'J':
+	case 'j':
+		if (DeBugMode) DeBugMode = false;
+		else DeBugMode = true;
+		break;
 
 	case 'Q':
 	case 'q':
@@ -312,7 +330,7 @@ void KeyUpEvents(HWND hWnd, WPARAM wParam) {
 		KEY.up = false;
 		break;
 	case VK_DOWN:
-		Player->m_ElapseTime = 0;
+		KEY.down = false;
 		Player->ani_state = ANI_sliding_up;
 		break;
 	case VK_LEFT:
@@ -385,11 +403,6 @@ void CheckCollision(Object* obj)
 			{
 				FlagCollision = true;
 				obj->CollisionEvent(ptr);
-
-				if (ptr->type == "Jump")
-				{
-					ObjectMgr.DeleteObject(ptr);
-				}
 			}
 		}
 

@@ -40,7 +40,7 @@ Object::~Object()
 void Object::DrawObjectImage(HDC mdc)
 {
 	//이미지의 어느부분을 보여주게 할건지 여기서 정함
-	int showRange{ 100 };
+	int showRange{ WINDOW_WIDTH };
 	if (-showRange < pos_x && pos_x < WINDOW_WIDTH + showRange)
 	{
 		if (type == "Cookie")
@@ -136,15 +136,15 @@ void Object::DrawObjectImage(HDC mdc)
 				image.left, image.top, image.right - image.left, image.bottom - image.top, // x, y, 넓이, 높이,
 				0, 0, ObjectImage.GetWidth(), ObjectImage.GetHeight());
 		}
-	}
-	if (DebugMode)
-	{
-		//위치 확인용
-		Draw::MakeCircle(mdc, pos_x - 5, pos_y - 5, pos_x + 5, pos_y + 5, RGB(0, 0, 255), 1, RGB(255, 0, 0));
-		//Draw::MakeDebugRectangle(mdc, image.left, image.top, image.right, image.bottom, RGB(0, 255, 0), 1);
-		Draw::MakeDebugRectangle(mdc, CollisionBox.left, CollisionBox.top, CollisionBox.right, CollisionBox.bottom, RGB(255, 0, 0), 1);
-	}
 
+		if (DebugMode)
+		{
+			//위치 확인용
+			Draw::MakeCircle(mdc, pos_x - 5, pos_y - 5, pos_x + 5, pos_y + 5, RGB(0, 0, 255), 1, RGB(255, 0, 0));
+			//Draw::MakeDebugRectangle(mdc, image.left, image.top, image.right, image.bottom, RGB(0, 255, 0), 1);
+			Draw::MakeDebugRectangle(mdc, CollisionBox.left, CollisionBox.top, CollisionBox.right, CollisionBox.bottom, RGB(255, 0, 0), 1);
+		}
+	}
 }
 
 void Object::BeginEvents()
@@ -218,7 +218,7 @@ void Object::CollisionEvent(Object* byWhat)
 {
 	if (byWhat)
 	{
-
+		if (type == "Cookie" && byWhat->type == "Jump") byWhat->SetObjectLocation(-10000,0);
 
 
 		
