@@ -195,38 +195,7 @@ void TickEvent() {
 	PlayerHandler();
 }
 
-void CheckCollision(Object* obj)
-{
-	Object* ptr = ObjectMgr.GetAllObjects();
 
-	bool FlagCollision{ false };
-
-	while (ptr != nullptr)
-	{
-		Object* nextptr = ptr->next;
-
-		if (ptr != obj)
-		{
-			if (obj->CollisionBox.right > ptr->CollisionBox.left &&
-				obj->CollisionBox.left < ptr->CollisionBox.right &&
-				obj->CollisionBox.bottom > ptr->CollisionBox.top &&
-				obj->CollisionBox.top < ptr->CollisionBox.bottom)
-			{
-				FlagCollision = true;
-				obj->CollisionEvent(ptr);
-
-				if (ptr->type == "Ground")
-				{
-					ObjectMgr.DeleteObject(ptr);
-				}
-			}
-		}
-
-		ptr = nextptr;
-	}
-
-	if(!FlagCollision) obj->CollisionEvent(nullptr);
-}
 
 void PlayerHandler() 
 {	
@@ -343,4 +312,32 @@ void MouseRightUpEvent(LPARAM lParam) {
 }
 
 
+void CheckCollision(Object* obj)
+{
+	Object* ptr = ObjectMgr.GetAllObjects();
 
+	bool FlagCollision{ false };
+
+	while (ptr != nullptr)
+	{
+		Object* nextptr = ptr->next;
+
+		if (ptr != obj)
+		{
+			if (obj->CollisionBox.right > ptr->CollisionBox.left &&
+				obj->CollisionBox.left < ptr->CollisionBox.right &&
+				obj->CollisionBox.bottom > ptr->CollisionBox.top &&
+				obj->CollisionBox.top < ptr->CollisionBox.bottom)
+			{
+				FlagCollision = true;
+				obj->CollisionEvent(ptr);
+
+
+			}
+		}
+
+		ptr = nextptr;
+	}
+
+	if (!FlagCollision) obj->CollisionEvent(nullptr);
+}
