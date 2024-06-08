@@ -386,7 +386,10 @@ void CheckCollision(Object* obj)
 				FlagCollision = true;
 				obj->CollisionEvent(ptr);
 
-
+				if (ptr->type == "Jump")
+				{
+					ObjectMgr.DeleteObject(ptr);
+				}
 			}
 		}
 

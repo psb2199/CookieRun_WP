@@ -40,106 +40,108 @@ Object::~Object()
 void Object::DrawObjectImage(HDC mdc)
 {
 	//이미지의 어느부분을 보여주게 할건지 여기서 정함
-
-	if (type == "Cookie")
+	int showRange{ 100 };
+	if (-showRange < pos_x && pos_x < WINDOW_WIDTH + showRange)
 	{
-		int sprite_size = 319; // 프레임 하나의 사이즈
-		int line_size = 3; // 프레임과 프레임 사이의 선 사이즈
+		if (type == "Cookie")
+		{
+			int sprite_size = 319; // 프레임 하나의 사이즈
+			int line_size = 3; // 프레임과 프레임 사이의 선 사이즈
 
-		float animation_speed = 7;
+			float animation_speed = 7;
 
-		image_raw = 1;
-		image_col = 4;
-
-		switch (ani_state) {
-		case ANI_running:
 			image_raw = 1;
 			image_col = 4;
-			break;
-		case ANI_jumping:
-			image_raw = 5;
-			image_col = 4;
-			break;
-		case ANI_double_jumping:
-			image_raw = 0;
-			image_col = 9;
-			break;
-		case ANI_sliding:
-			image_raw = 0;
-			image_col = 11;
-			break;
-		case ANI_sliding_up:
-			image_raw = 0;
-			image_col = 14;
-			break;
+
+			switch (ani_state) {
+			case ANI_running:
+				image_raw = 1;
+				image_col = 4;
+				break;
+			case ANI_jumping:
+				image_raw = 5;
+				image_col = 4;
+				break;
+			case ANI_double_jumping:
+				image_raw = 0;
+				image_col = 9;
+				break;
+			case ANI_sliding:
+				image_raw = 0;
+				image_col = 11;
+				break;
+			case ANI_sliding_up:
+				image_raw = 0;
+				image_col = 14;
+				break;
+			}
+
+			int animation_time = floor(MyH::fract(m_ElapseTime * animation_speed) * image_col);
+
+			switch (ani_state) {
+			case ANI_jumping:
+				if (count_jump == 2 && animation_time == 3)
+				{
+					ani_state = ANI_double_jumping;
+					count_jump = 0;
+				}
+				else if (animation_time == 3)
+				{
+					ani_state = ANI_running;
+					count_jump = 0;
+				}
+				break;
+			case ANI_double_jumping:
+				if (animation_time == 8)
+				{
+					ani_state = ANI_running;
+				}
+				break;
+			case ANI_sliding:
+				if (animation_time % 2 == 0)
+					animation_time = 8;
+				else
+					animation_time = 9;
+				break;
+			case ANI_sliding_up:
+				if (animation_time < 10)
+				{
+					animation_time = 10;
+					ani_state = ANI_running;
+				}
+				if (animation_time == 13)
+				{
+					ani_state = ANI_running;
+				}
+				break;
+			}
+
+
+
+			ObjectImage.Draw(mdc,
+				image.left, image.top, image.right - image.left, image.bottom - image.top, // x, y, 넓이, 높이,
+				line_size * animation_time + animation_time * sprite_size + 2, line_size * (image_raw + 1) + sprite_size * image_raw, sprite_size, sprite_size); // 이미지 내의 좌표
+
+
 		}
-
-		int animation_time = floor(MyH::fract(m_ElapseTime * animation_speed) * image_col);
-
-		switch (ani_state) {
-		case ANI_jumping:
-			if (count_jump == 2 && animation_time == 3)
-			{
-				ani_state = ANI_double_jumping;
-				count_jump = 0;
-			}
-			else if (animation_time == 3)
-			{
-				ani_state = ANI_running;
-				count_jump = 0;
-			}
-			break;
-		case ANI_double_jumping:
-			if (animation_time == 8)
-			{
-				ani_state = ANI_running;
-			}
-			break;
-		case ANI_sliding:
-			if (animation_time % 2 == 0)
-				animation_time = 8;
-			else
-				animation_time = 9;
-			break;
-		case ANI_sliding_up:
-			if (animation_time < 10)
-			{
-				animation_time = 10;
-				ani_state = ANI_running;
-			}
-			if (animation_time == 13)
-			{
-				ani_state = ANI_running;
-			}
-			break;
+		else if (type == "BackGround" || type == "BackGround2")
+		{
+			ObjectImage.Draw(mdc,
+				image.left, image.top, image.right - image.left, image.bottom - image.top, // x, y, 넓이, 높이,
+				0, 0, ObjectImage.GetWidth(), ObjectImage.GetHeight());
 		}
-
-	
-
-		ObjectImage.Draw(mdc,
-			image.left, image.top, image.right - image.left, image.bottom - image.top, // x, y, 넓이, 높이,
-			line_size * animation_time + animation_time * sprite_size + 2, line_size * (image_raw + 1) + sprite_size * image_raw, sprite_size, sprite_size); // 이미지 내의 좌표
-
-
+		else
+		{
+			ObjectImage.Draw(mdc,
+				image.left, image.top, image.right - image.left, image.bottom - image.top, // x, y, 넓이, 높이,
+				0, 0, ObjectImage.GetWidth(), ObjectImage.GetHeight());
+		}
 	}
-	else if (type == "BackGround" || type == "BackGround2")
-	{
-		ObjectImage.Draw(mdc,
-			image.left, image.top, image.right - image.left, image.bottom - image.top, // x, y, 넓이, 높이,
-			0, 0, ObjectImage.GetWidth(), ObjectImage.GetHeight());
-	}
-	else
-	{
-		ObjectImage.Draw(mdc,
-			image.left, image.top, image.right - image.left, image.bottom - image.top, // x, y, 넓이, 높이,
-			0, 0, ObjectImage.GetWidth(), ObjectImage.GetHeight());
-	}
-
 	if (DebugMode)
 	{
 		//위치 확인용
 		Draw::MakeCircle(mdc, pos_x - 5, pos_y - 5, pos_x + 5, pos_y + 5, RGB(0, 0, 255), 1, RGB(255, 0, 0));
-		Draw::MakeDebugRectangle(mdc, image.left, image.top, image.right, image.bottom, RGB(0, 255, 0), 1);
+		//Draw::MakeDebugRectangle(mdc, image.left, image.top, image.right, image.bottom, RGB(0, 255, 0), 1);
 		Draw::MakeDebugRectangle(mdc, CollisionBox.left, CollisionBox.top, CollisionBox.right, CollisionBox.bottom, RGB(255, 0, 0), 1);
 	}
 
@@ -171,23 +173,23 @@ void Object::BeginEvents()
 	{
 		float m_size = 60;
 		SetObjectVertexLocation(pos_x - m_size * size, pos_y - m_size * size, pos_x + m_size * size, pos_y + m_size * size);
+		SetCollisionBox(ObjectImage.GetWidth() / 2, ObjectImage.GetWidth() / 2, ObjectImage.GetHeight() / 2, ObjectImage.GetHeight() / 2);
 	}
 	else if (type == "Jump")
 	{
 		float ratio1 = ObjectImage.GetWidth() / 1.6;
 		float ratio2 = ObjectImage.GetHeight() / 1.6;
 		SetObjectVertexLocation(pos_x, pos_y, pos_x + ratio1, pos_y + ratio2);
+		SetCollisionBox(ObjectImage.GetWidth() / 2, ObjectImage.GetWidth() / 2, ObjectImage.GetHeight() / 2, ObjectImage.GetHeight() / 2);
 	}
 	else if (type == "Jelly")
 	{
 		float ratio1 = ObjectImage.GetWidth() / 1.6;
 		float ratio2 = ObjectImage.GetHeight() / 1.6;
 		SetObjectVertexLocation(pos_x, pos_y, pos_x + ratio1, pos_y + ratio2);
-	}
-	else
-	{
 		SetCollisionBox(ObjectImage.GetWidth() / 2, ObjectImage.GetWidth() / 2, ObjectImage.GetHeight() / 2, ObjectImage.GetHeight() / 2);
 	}
+
 }
 
 void Object::TickEvents()
@@ -219,11 +221,11 @@ void Object::CollisionEvent(Object* byWhat)
 
 
 
-		ani_state = ANI_jumping;
+		
 	}
 	else
 	{
-		ani_state = ANI_running;
+
 	}
 
 }
@@ -318,6 +320,11 @@ void Object::DoJump()
 		jumping_time = 0;
 		isJumping = false;
 	}
+}
+
+void Object::SetDebugMode(bool value)
+{
+	DebugMode = value;
 }
 
 void Object::UpdateCollisionBox()

@@ -33,6 +33,7 @@ public:
 	void SetObjectLocation(float x, float y);
 	void SetCollisionBox(float l, float r, float t, float b);
 	void DoJump();
+	void SetDebugMode(bool value);
 	
 private:
 	void UpdateCollisionBox();
