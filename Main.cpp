@@ -203,6 +203,8 @@ void CheckCollision(Object* obj)
 
 	while (ptr != nullptr)
 	{
+		Object* nextptr = ptr->next;
+
 		if (ptr != obj)
 		{
 			if (obj->CollisionBox.right > ptr->CollisionBox.left &&
@@ -212,10 +214,15 @@ void CheckCollision(Object* obj)
 			{
 				FlagCollision = true;
 				obj->CollisionEvent(ptr);
+
+				if (ptr->type == "Ground")
+				{
+					ObjectMgr.DeleteObject(ptr);
+				}
 			}
 		}
 
-		ptr = ptr->next;
+		ptr = nextptr;
 	}
 
 	if(!FlagCollision) obj->CollisionEvent(nullptr);
