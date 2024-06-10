@@ -23,6 +23,9 @@ void TickEvent();
 void CheckCollision(Object* obj);
 void KeyDownEvents(HWND hWnd, WPARAM wParam);
 void KeyUpEvents(HWND hWnd, WPARAM wParam);
+
+bool PlayMode{ true };
+
 struct KeyEventFlag {
 	bool up{ false };
 	bool down{ false };
@@ -160,9 +163,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		break;
 
 	case WM_TIMER:
-		GameTime += DELTA_TIME;
-		TickEvent();
-		InvalidateRect(hWnd, NULL, false);
+		if (PlayMode) {
+			GameTime += DELTA_TIME;
+			TickEvent();
+			InvalidateRect(hWnd, NULL, false);
+		}
 		break;
 
 	case WM_DESTROY:
@@ -179,8 +184,8 @@ void Initialize() {
 
 	MakeBackGround2();
 	MakeBackGround1();
-	MakeObstacles();
 	MakeBridge();
+	MakeObstacles();
 	Player = ObjectMgr.AddObject("Cookie", ImageL.I_AngelCookie, 1, 200, 350);
 
 }
@@ -202,7 +207,7 @@ void TickEvent() {
 			ptr->SetDebugMode(DeBugMode);
 			ptr->m_ElapseTime += DELTA_TIME;
 		}
-		
+
 		ptr = ptr->next;
 	}
 
@@ -215,7 +220,7 @@ void PlayerHandler()
 	if (KEY.left) Player->AddObjectMovement(-speed, 0);
 	if (KEY.right) Player->AddObjectMovement(speed, 0);
 	if (KEY.keyJ) Player->AddObjectMovement(0, -speed);
-	if (KEY.down) 
+	if (KEY.down)
 	{
 		Player->ani_state = ANI_sliding;
 	}
@@ -227,12 +232,15 @@ void MakeBridge()
 	std::ifstream ifs;
 	ifs.open("Bridge.txt");
 	int pos_x{};
+
+	/*std::ofstream ofs;
+	ofs.open("Jump2_Pink.txt");
+	int posX{};*/
+
 	while (ifs >> pos_x) {
 		ObjectMgr.AddObject("Bridge", ImageL.I_Bridge1, 1, pos_x, 550);
 		//ObjectMgr.AddObject("Jelly", ImageL.I_CommonJelly, 1, pos_x-30, 430);
-		//ObjectMgr.AddObject("Jump", ImageL.I_jp1A, 1, pos_x - 30, 410);
-		//ObjectMgr.AddObject("Jump", ImageL.I_jp2A, 1, pos_x - 40, 340);
-		ObjectMgr.AddObject("Jump", ImageL.I_jp2B, 1, pos_x - 40, 340);
+
 	}
 
 	//for (int i{ 0 }; i < 300; ++i)
@@ -246,12 +254,40 @@ void MakeObstacles()
 	std::ifstream ifs;
 	ifs.open("Sliding1.txt");
 	int pos_x{};
-
+	
 	while (ifs >> pos_x) {
-		ObjectMgr.AddObject("Sliding1", ImageL.I_Sd1, 1, pos_x, 0);
+		ObjectMgr.AddObject("Sliding1", ImageL.I_Sd1, 1, pos_x, 170);
 	}
 
+	ifs.close();
+	ifs.clear();
 
+	ifs.open("Jump2_Green.txt");
+
+	while (ifs >> pos_x) {
+		ObjectMgr.AddObject("Jump", ImageL.I_jp2A, 1, pos_x, 340);
+	}
+
+	ifs.close();
+	ifs.clear();
+
+	ifs.open("Jump2_Pink.txt");
+
+	while (ifs >> pos_x) {
+		ObjectMgr.AddObject("Jump", ImageL.I_jp2B, 1, pos_x, 340);
+	}
+
+	ifs.close();
+	ifs.clear();
+
+	ifs.open("Jump1.txt");
+
+	while (ifs >> pos_x) {
+		ObjectMgr.AddObject("Jump", ImageL.I_jp1A, 1, pos_x, 410);
+	}
+
+	ifs.close();
+	ifs.clear();
 }
 
 void MakeBackGround1()
@@ -314,6 +350,11 @@ void KeyDownEvents(HWND hWnd, WPARAM wParam) {
 	case 'j':
 		if (DeBugMode) DeBugMode = false;
 		else DeBugMode = true;
+		break;
+
+	case 'P':
+	case 'p':
+		PlayMode = !PlayMode;
 		break;
 
 	case 'Q':
