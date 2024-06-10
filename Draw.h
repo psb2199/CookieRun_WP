@@ -4,7 +4,7 @@
 
 class Draw
 {
-private:
+public:
 	Draw();
 	~Draw();
 

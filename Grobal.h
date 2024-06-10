@@ -16,3 +16,9 @@
 #define Background2 3
 
 #define Bridge_width 120
+
+// jelly
+#define General 1
+#define YellowBear 2
+#define PinkBear 3
+#define BigBear 4

@@ -20,4 +20,7 @@ void ImageLoader::LoadAllImage()
 	I_jp2A.Load(L".\\CookieRun_Resource\\Land1\\Land1 장애물\\epN01_tm02_jp2A.png");
 	I_jp2B.Load(L".\\CookieRun_Resource\\Land1\\Land1 장애물\\epN01_tm02_jp2B.png");
 	I_CommonJelly.Load(L".\\CookieRun_Resource\\GeneralJelly.png");
+	I_YellowBear.Load(L".\\CookieRun_Resource\\YellowBear.png");
+	I_PinkBear.Load(L".\\CookieRun_Resource\\PinkBear.png");
+	I_BigBear.Load(L".\\CookieRun_Resource\\BigBear.png");
 }

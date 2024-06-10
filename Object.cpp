@@ -218,7 +218,7 @@ void Object::CollisionEvent(Object* byWhat)
 {
 	if (byWhat)
 	{
-		//if (type == "Cookie" && byWhat->type == "Jump") byWhat->SetObjectLocation(-10000,0);
+		if (type == "Cookie" && byWhat->type == "Jelly") byWhat->SetObjectLocation(-10000,0);
 
 
 		

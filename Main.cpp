@@ -14,7 +14,6 @@ HINSTANCE g_hInst;
 LPCTSTR lpszClass = L"Window Class Name";
 LPCTSTR lpszWindowName = L"CookieRun";
 
-
 LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam);
 
 void Initialize();
@@ -53,6 +52,8 @@ MouseEventFlag MOUSE;
 
 ImageLoader ImageL;
 ObjectManager ObjectMgr;
+Draw draw;
+Object obj;
 
 Object* Player;
 bool DeBugMode{ false };
@@ -61,6 +62,21 @@ void MakeBridge();
 void MakeBackGround1();
 void MakeBackGround2();
 void MakeObstacles();
+void MakeGrid(HDC mdc);
+RECT Grid[28][28];
+int jellytype{ General };
+int move_x{};
+
+struct Board {
+	int x1;
+	int y1;
+	int x2;
+	int y2;
+	int realX;
+	int realY;
+};
+
+Board board[28][28];
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdParam, int nCmdShow) {
 	HWND hWnd;
@@ -125,7 +141,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		break;
 
 	case WM_LBUTTONDOWN:
-		MouseLeftDownEvent(lParam);
+	/*	MouseLeftDownEvent(lParam);
+		InvalidateRect(hWnd, NULL, false);*/
 		break;
 	case WM_LBUTTONUP:
 		MouseLeftUpEvent(lParam);
@@ -150,6 +167,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		(HBITMAP)SelectObject(mDC, hBitmap);
 
 		DrawObject(mDC);
+		//MakeGrid(mDC);
 
 		BitBlt(hDC, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, mDC, 0, 0, SRCCOPY);
 		TransparentBlt(hDC, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, mDC, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, RGB(0, 0, 0));
@@ -179,14 +197,36 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 }
 
 void Initialize() {
+
 	ObjectMgr.DeleteAll();
 	ImageL.LoadAllImage();
+
+	float width = WINDOW_WIDTH / 28;
+	float height = WINDOW_HEIGHT / 20;
+
+	/*for (int i = 0; i < 28; ++i) {
+		for (int j = 0; j < 28; ++j) {
+			Grid[i][j] = { i * (int)width ,j * (int)height ,i * (int)width + (int)width,j * (int)height + (int)height };
+			board[i][j].realX = Grid[i][j].left;
+		}
+	}*/
 
 	MakeBackGround2();
 	MakeBackGround1();
 	MakeBridge();
 	MakeObstacles();
 	Player = ObjectMgr.AddObject("Cookie", ImageL.I_AngelCookie, 1, 200, 350);
+
+}
+
+void MakeGrid(HDC mdc) {
+	float width = WINDOW_WIDTH / 28;
+	float height = WINDOW_HEIGHT / 20;
+
+	for (int i = 0; i < 28 + 1; ++i) {
+		draw.MakeLine(mdc, 0, i * height, WINDOW_WIDTH, i * height, RGB(0, 0, 0), 1, PS_SOLID);
+		draw.MakeLine(mdc, i * width, 0, i * width, WINDOW_HEIGHT, RGB(0, 0, 0), 1, PS_SOLID);
+	}
 
 }
 
@@ -233,20 +273,10 @@ void MakeBridge()
 	ifs.open("Bridge.txt");
 	int pos_x{};
 
-	/*std::ofstream ofs;
-	ofs.open("Jump2_Pink.txt");
-	int posX{};*/
-
 	while (ifs >> pos_x) {
 		ObjectMgr.AddObject("Bridge", ImageL.I_Bridge1, 1, pos_x, 550);
-		//ObjectMgr.AddObject("Jelly", ImageL.I_CommonJelly, 1, pos_x-30, 430);
 
 	}
-
-	//for (int i{ 0 }; i < 300; ++i)
-	//{
-	//	ObjectMgr.AddObject("Jump", ImageL.I_jp2B, 1, i * 300, 340);
-	//}
 }
 
 void MakeObstacles()
@@ -254,7 +284,8 @@ void MakeObstacles()
 	std::ifstream ifs;
 	ifs.open("Sliding1.txt");
 	int pos_x{};
-	
+	int pos_y{};
+
 	while (ifs >> pos_x) {
 		ObjectMgr.AddObject("Sliding1", ImageL.I_Sd1, 1, pos_x, 170);
 	}
@@ -288,6 +319,40 @@ void MakeObstacles()
 
 	ifs.close();
 	ifs.clear();
+
+	ifs.open("make_general_jelly.txt");
+
+	while (ifs >> pos_x >> pos_y) {
+		ObjectMgr.AddObject("Jelly", ImageL.I_CommonJelly, 1, pos_x, pos_y);
+	}
+
+	ifs.close();
+	ifs.clear();
+
+	ifs.open("make_yellow_bear_jelly.txt");
+
+	while (ifs >> pos_x >> pos_y) {
+		ObjectMgr.AddObject("Jelly", ImageL.I_YellowBear, 1, pos_x, pos_y);
+	}
+
+	ifs.close();
+	ifs.clear();
+
+	ifs.open("make_big_bear_jelly.txt");
+
+	while (ifs >> pos_x >> pos_y) {
+		ObjectMgr.AddObject("Jelly", ImageL.I_BigBear, 1, pos_x, pos_y);
+	}
+
+	ifs.close();
+	ifs.clear();
+
+	ifs.open("make_pink_bear_jelly.txt");
+
+	while (ifs >> pos_x >> pos_y) {
+		ObjectMgr.AddObject("Jelly", ImageL.I_PinkBear, 1, pos_x, pos_y);
+	}
+
 }
 
 void MakeBackGround1()
@@ -311,6 +376,18 @@ void KeyDownEvents(HWND hWnd, WPARAM wParam) {
 	Object* ptr = ObjectMgr.GetAllObjects();
 
 	switch (wParam) {
+	case '1':
+		jellytype = General;
+		break;
+	case '2':
+		jellytype = YellowBear;
+		break;
+	case '3':
+		jellytype = PinkBear;
+		break;
+	case '4':
+		jellytype = BigBear;
+		break;
 
 	case VK_UP:
 		KEY.up = true;
@@ -321,7 +398,12 @@ void KeyDownEvents(HWND hWnd, WPARAM wParam) {
 		break;
 
 	case VK_LEFT:
-		KEY.left = true;
+		TickEvent();
+		for (int i = 0; i < 28; ++i) {
+			for (int j = 0; j < 28; ++j) {
+				board[i][j].realX += 6;
+			}
+		}
 		break;
 
 	case VK_RIGHT:
@@ -339,11 +421,11 @@ void KeyDownEvents(HWND hWnd, WPARAM wParam) {
 		KEY.KeySubtract = true;
 		break;
 	case VK_SPACE:
-		KEY.KeySpace = true;
-		Player->m_ElapseTime = 0;
-		Player->isJumping = true;
-		Player->ani_state = ANI_jumping;
-		Player->count_jump += 1;
+			KEY.KeySpace = true;
+			Player->m_ElapseTime = 0;
+			Player->isJumping = true;
+			Player->ani_state = ANI_jumping;
+			Player->count_jump += 1;
 		break;
 
 	case 'J':
@@ -407,6 +489,37 @@ void MouseLeftDownEvent(LPARAM lParam) {
 	MOUSE.x = LOWORD(lParam);
 	MOUSE.y = HIWORD(lParam);
 
+	float width = WINDOW_WIDTH / 28;
+
+	float pos_x1{};
+	int pos_y1{};
+
+	float pos_x2{};
+	int pos_y2{};
+
+	float pos_x3{};
+	int pos_y3{};
+
+	for (int i = 0; i < 28; ++i) {
+		for (int j = 0; j < 28; ++j) {
+			if (Grid[i][j].left <= MOUSE.x && Grid[i][j].top <= MOUSE.y &&
+				Grid[i][j].right >= MOUSE.x && Grid[i][j].bottom >= MOUSE.y)
+				switch (jellytype) {
+				case General:
+					ObjectMgr.AddObject("Jelly", ImageL.I_CommonJelly, 1, Grid[i][j].left, Grid[i][j].top);
+					break;
+				case YellowBear:
+					ObjectMgr.AddObject("Jelly", ImageL.I_YellowBear, 1, Grid[i][j].left, Grid[i][j].top);
+					break;
+				case PinkBear:
+					ObjectMgr.AddObject("Jelly", ImageL.I_PinkBear, 1, Grid[i][j].left, Grid[i][j].top);
+					break;
+				case BigBear:
+					ObjectMgr.AddObject("Jelly", ImageL.I_BigBear, 1, Grid[i][j].left, Grid[i][j].top);
+					break;
+				}
+		}
+	}
 
 }
 

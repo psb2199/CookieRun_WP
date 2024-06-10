@@ -20,5 +20,8 @@ public:
 	CImage I_jp2A;
 	CImage I_jp2B;
 	CImage I_CommonJelly;
+	CImage I_YellowBear;
+	CImage I_PinkBear;
+	CImage I_BigBear;
 };
 
