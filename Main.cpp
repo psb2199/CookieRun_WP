@@ -20,6 +20,7 @@ void Initialize();
 void DrawObject(HDC mdc);
 void TickEvent();
 void CheckCollision(Object* obj);
+void MagnetMode(Object* obj);
 void KeyDownEvents(HWND hWnd, WPARAM wParam);
 void KeyUpEvents(HWND hWnd, WPARAM wParam);
 
@@ -248,6 +249,7 @@ void TickEvent() {
 		{
 			ptr->TickEvents();
 			CheckCollision(ptr);
+			if (Player->MagnetMode == true) MagnetMode(ptr);
 			ptr->SetDebugMode(DeBugMode);
 			ptr->m_ElapseTime += DELTA_TIME;
 		}
@@ -291,7 +293,7 @@ void MakeObstacles()
 	int pos_y{};
 
 	while (ifs >> pos_x) {
-		ObjectMgr.AddObject("Sliding1", ImageL.I_Sd1, 1, pos_x, 170);
+		ObjectMgr.AddObject("Obstacle_S", ImageL.I_Sd1, 1, pos_x - 70, 170);
 	}
 
 	ifs.close();
@@ -300,7 +302,7 @@ void MakeObstacles()
 	ifs.open("Jump2_Green.txt");
 
 	while (ifs >> pos_x) {
-		ObjectMgr.AddObject("Jump", ImageL.I_jp2A, 1, pos_x, 340);
+		ObjectMgr.AddObject("Obstacle_J", ImageL.I_jp2A, 1, pos_x, 340);
 	}
 
 	ifs.close();
@@ -309,7 +311,7 @@ void MakeObstacles()
 	ifs.open("Jump2_Pink.txt");
 
 	while (ifs >> pos_x) {
-		ObjectMgr.AddObject("Jump", ImageL.I_jp2B, 1, pos_x, 340);
+		ObjectMgr.AddObject("Obstacle_J", ImageL.I_jp2B, 1, pos_x, 340);
 	}
 
 	ifs.close();
@@ -318,7 +320,7 @@ void MakeObstacles()
 	ifs.open("Jump1.txt");
 
 	while (ifs >> pos_x) {
-		ObjectMgr.AddObject("Jump", ImageL.I_jp1A, 1, pos_x, 410);
+		ObjectMgr.AddObject("Obstacle_J", ImageL.I_jp1A, 1, pos_x, 410);
 	}
 
 	ifs.close();
@@ -333,7 +335,7 @@ void MakeCoin()
 	int pos_x{};
 	int pos_y{};
 
-	while (ifs >> pos_x>> pos_y) {
+	while (ifs >> pos_x >> pos_y) {
 		ObjectMgr.AddObject("Coin", ImageL.I_BigCoin, 1, pos_x, pos_y);
 	}
 
@@ -398,6 +400,23 @@ void MakeJelly()
 
 	ifs.close();
 	ifs.clear();
+
+	ifs.open("energy.txt");
+
+	while (ifs >> pos_x >> pos_y) {
+		ObjectMgr.AddObject("Energy", ImageL.I_Energyitem, 1, pos_x, pos_y);
+	}
+
+	ifs.close();
+	ifs.clear();
+
+	ObjectMgr.AddObject("Big", ImageL.I_Bigitem, 1, 2653, 360);
+	ObjectMgr.AddObject("Big", ImageL.I_Bigitem, 1, 8539, 360);
+
+	ObjectMgr.AddObject("Fast", ImageL.I_Fastitem, 1, 13281, 360);
+	ObjectMgr.AddObject("Fast", ImageL.I_Fastitem, 1, 15126, 390);
+	ObjectMgr.AddObject("Fast", ImageL.I_Fastitem, 1, 17964, 330);
+	ObjectMgr.AddObject("Fast", ImageL.I_Fastitem, 1, 34037, 390);
 }
 
 void MakeBackGround1()
@@ -442,7 +461,15 @@ void KeyDownEvents(HWND hWnd, WPARAM wParam) {
 	case '7':
 		jellytype = BigCoin;
 		break;
-
+	case '8':
+		jellytype = BigItem;
+		break;
+	case '9':
+		jellytype = FastItem;
+		break;
+	case '0':
+		jellytype = EnergyItem;
+		break;
 	case VK_UP:
 		KEY.up = true;
 		break;
@@ -475,11 +502,11 @@ void KeyDownEvents(HWND hWnd, WPARAM wParam) {
 		KEY.KeySubtract = true;
 		break;
 	case VK_SPACE:
-			KEY.KeySpace = true;
-			Player->m_ElapseTime = 0;
-			Player->isJumping = true;
-			Player->ani_state = ANI_jumping;
-			Player->count_jump += 1;
+		KEY.KeySpace = true;
+		Player->m_ElapseTime = 0;
+		Player->isJumping = true;
+		Player->ani_state = ANI_jumping;
+		Player->count_jump += 1;
 		break;
 
 	case 'J':
@@ -546,7 +573,7 @@ void MouseLeftDownEvent(LPARAM lParam) {
 	float width = WINDOW_WIDTH / 28;
 
 	//std::ofstream ofs;
-	//ofs.open("make_gold_coin.txt", std::ios::app);
+	//ofs.open("general_jelly.txt", std::ios::app);
 
 	float pos_x1{};
 	int pos_y1{};
@@ -581,7 +608,16 @@ void MouseLeftDownEvent(LPARAM lParam) {
 					ObjectMgr.AddObject("Coin", ImageL.I_GoldCoin, 1, Grid[i][j].left, Grid[i][j].top);
 					break;
 				case BigCoin:
-					ObjectMgr.AddObject("Coin", ImageL.I_BigCoin, 1, Grid[i][j].left, Grid[i][j].top);
+					ObjectMgr.AddObject("GoldCoin", ImageL.I_BigCoin, 1, Grid[i][j].left, Grid[i][j].top);
+					break;
+				case BigItem:
+					ObjectMgr.AddObject("Big", ImageL.I_Bigitem, 1, Grid[i][j].left, Grid[i][j].top);
+					break;
+				case FastItem:
+					ObjectMgr.AddObject("Fast", ImageL.I_Fastitem, 1, Grid[i][j].left, Grid[i][j].top);
+					break;
+				case EnergyItem:
+					ObjectMgr.AddObject("Energy", ImageL.I_Energyitem, 1, Grid[i][j].left, Grid[i][j].top);
 					break;
 				}
 		}
@@ -601,6 +637,24 @@ void MouseRightDownEvent(LPARAM lParam) {
 
 void MouseRightUpEvent(LPARAM lParam) {
 	MOUSE.right_click = false;
+}
+
+void MagnetMode(Object* obj)
+{
+
+	if (obj->type == "Jelly" || obj->type == "Coin" || obj->type == "GoldCoin"||
+		obj->type == "Big" || obj->type == "Fast" || obj->type == "Energy" && obj != Player)
+	{
+		if (obj->CollisionBox.right < WINDOW_WIDTH / 2 && obj->CollisionBox.top < Player->CollisionBox.top)
+		{
+			obj->AddObjectMovement(-10, 10);
+		}
+		else if (obj->CollisionBox.right < WINDOW_WIDTH / 2 && obj->CollisionBox.top > Player->CollisionBox.top)
+		{
+			obj->AddObjectMovement(-10, 0);
+		}
+	}
+
 }
 
 

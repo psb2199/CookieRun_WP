@@ -9,6 +9,8 @@
 #define ANI_double_jumping 3
 #define ANI_sliding 4
 #define ANI_sliding_up 5
+#define ANI_collision 6
+#define ANI_fast 7
 
 // type 
 #define Cookie 1
@@ -25,3 +27,6 @@
 #define SilverCoin 5
 #define GoldCoin 6
 #define BigCoin 7
+#define BigItem 8
+#define FastItem 9
+#define EnergyItem 10

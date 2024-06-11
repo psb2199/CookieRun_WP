@@ -55,6 +55,9 @@ public:
 	int image_col;
 
 	bool isJumping{ false };
+	bool MagnetMode{ false };
+	bool FastMode{ false };
+	bool BigMode{ false };
 
 	Object* next;
 	Object* prev;

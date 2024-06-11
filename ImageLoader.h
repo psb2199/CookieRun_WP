@@ -26,5 +26,8 @@ public:
 	CImage I_SilverCoin;
 	CImage I_GoldCoin;
 	CImage I_BigCoin;
+	CImage I_Bigitem;
+	CImage I_Fastitem;
+	CImage I_Energyitem;
 };
 

@@ -26,4 +26,7 @@ void ImageLoader::LoadAllImage()
 	I_SilverCoin.Load(L".\\CookieRun_Resource\\SilverCoin.png");
 	I_GoldCoin.Load(L".\\CookieRun_Resource\\GoldCoin.png");
 	I_BigCoin.Load(L".\\CookieRun_Resource\\BigCoin.png");
+	I_Bigitem.Load(L".\\CookieRun_Resource\\big_item.png");
+	I_Fastitem.Load(L".\\CookieRun_Resource\\fast_item.png");
+	I_Energyitem.Load(L".\\CookieRun_Resource\\energy_item.png");
 }

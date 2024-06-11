@@ -116,11 +116,18 @@ void Object::DrawObjectImage(HDC mdc)
 				break;
 			}
 
-
-
-			ObjectImage.Draw(mdc,
-				image.left, image.top, image.right - image.left, image.bottom - image.top, // x, y, 넓이, 높이,
-				line_size * animation_time + animation_time * sprite_size + 2, line_size * (image_raw + 1) + sprite_size * image_raw, sprite_size, sprite_size); // 이미지 내의 좌표
+			if (BigMode) 
+			{
+				ObjectImage.Draw(mdc,
+					image.left-100, image.top-130, (image.right - image.left)*1.5, (image.bottom - image.top)*1.5, // x, y, 넓이, 높이,
+					line_size * animation_time + animation_time * sprite_size + 2, line_size * (image_raw + 1) + sprite_size * image_raw, sprite_size, sprite_size); // 이미지 내의 좌표
+			}
+			else
+			{
+				ObjectImage.Draw(mdc,
+					image.left, image.top, image.right - image.left, image.bottom - image.top, // x, y, 넓이, 높이,
+					line_size * animation_time + animation_time * sprite_size + 2, line_size * (image_raw + 1) + sprite_size * image_raw, sprite_size, sprite_size); // 이미지 내의 좌표
+			}
 
 
 		}
@@ -160,6 +167,7 @@ void Object::BeginEvents()
 		SetCollisionBox(m_size / 2 * size, m_size / 2 * size, 0 * size, m_size * size);
 
 		ani_state = ANI_running;
+		MagnetMode = true;
 		count_jump = 0;
 	}
 	else if (type == "BackGround" || type == "BackGround2")
@@ -175,26 +183,40 @@ void Object::BeginEvents()
 		SetObjectVertexLocation(pos_x - m_size * size, pos_y - m_size * size, pos_x + m_size * size, pos_y + m_size * size);
 		SetCollisionBox(ObjectImage.GetWidth() / 2, ObjectImage.GetWidth() / 2, ObjectImage.GetHeight() / 2, ObjectImage.GetHeight() / 2);
 	}
-	else if (type == "Jump")
+	else if (type == "Obstacle_J")
 	{
 		float ratio1 = ObjectImage.GetWidth() / 1.6;
 		float ratio2 = ObjectImage.GetHeight() / 1.6;
 		SetObjectVertexLocation(pos_x, pos_y, pos_x + ratio1, pos_y + ratio2);
-		SetCollisionBox(ObjectImage.GetWidth() / 2, ObjectImage.GetWidth() / 2, ObjectImage.GetHeight() / 2, ObjectImage.GetHeight() / 2);
+		SetCollisionBox(ObjectImage.GetWidth() / 3, ObjectImage.GetWidth() / 3, ObjectImage.GetHeight() / 3, ObjectImage.GetHeight() / 3);
+	}
+	else if (type == "Obstacle_S")
+	{
+		float ratio1 = ObjectImage.GetWidth() / 1.17;
+		float ratio2 = ObjectImage.GetHeight() / 1.17;
+		SetObjectVertexLocation(pos_x, 0, pos_x + ratio1, 0 + ratio2);
+		SetCollisionBox(ObjectImage.GetWidth() / 3, ObjectImage.GetWidth() / 3, ObjectImage.GetHeight() / 3, ObjectImage.GetHeight() / 3);
 	}
 	else if (type == "Jelly" || type == "Coin")
 	{
 		float ratio1 = ObjectImage.GetWidth() / 1.6;
 		float ratio2 = ObjectImage.GetHeight() / 1.6;
 		SetObjectVertexLocation(pos_x, pos_y, pos_x + ratio1, pos_y + ratio2);
-		SetCollisionBox(ObjectImage.GetWidth() / 2, ObjectImage.GetWidth() / 2, ObjectImage.GetHeight() / 2, ObjectImage.GetHeight() / 2);
+		SetCollisionBox(ObjectImage.GetWidth() / 4, ObjectImage.GetWidth() / 4, ObjectImage.GetHeight() / 4, ObjectImage.GetHeight() / 4);
 	}
 	else if (type == "GoldCoin")
 	{
 		float ratio1 = ObjectImage.GetWidth() / 1.8;
 		float ratio2 = ObjectImage.GetHeight() / 1.8;
 		SetObjectVertexLocation(pos_x, pos_y, pos_x + ratio1, pos_y + ratio2);
-		SetCollisionBox(ObjectImage.GetWidth() / 2, ObjectImage.GetWidth() / 2, ObjectImage.GetHeight() / 2, ObjectImage.GetHeight() / 2);
+		SetCollisionBox(ObjectImage.GetWidth() / 4, ObjectImage.GetWidth() / 4, ObjectImage.GetHeight() / 4, ObjectImage.GetHeight() / 4);
+	}
+	else if (type == "Big" || type == "Fast" || type == "Energy" || type == "Magnet")
+	{
+		float ratio1 = ObjectImage.GetWidth() / 2.3;
+		float ratio2 = ObjectImage.GetHeight() / 2.3;
+		SetObjectVertexLocation(pos_x, pos_y, pos_x + ratio1, pos_y + ratio2);
+		SetCollisionBox(ObjectImage.GetWidth() / 5, ObjectImage.GetWidth() / 5, ObjectImage.GetHeight() / 5, ObjectImage.GetHeight() / 5);
 	}
 
 }
@@ -214,10 +236,22 @@ void Object::TickEvents()
 		float speed = 2;
 		AddObjectMovement(-speed, 0);
 	}
-	else if (type == "Bridge" || type == "Sliding1" || type == "Jump" || type == "Jelly" || type == "Coin" || type == "GoldCoin")
+	else if (type == "Bridge" || type == "Obstacle_J" || type == "Obstacle_S")
 	{
 		float speed = 6;
 		AddObjectMovement(-speed, 0);
+	}
+	else if (type == "Jelly" || type == "Coin" || type == "GoldCoin")
+	{
+		float speed = 6;
+		AddObjectMovement(-speed, 0);
+
+	}
+	else if (type == "Big" || type == "Fast" || type == "Energy")
+	{
+		float speed = 6;
+		AddObjectMovement(-speed, 0);
+
 	}
 }
 
@@ -225,8 +259,24 @@ void Object::CollisionEvent(Object* byWhat)
 {
 	if (byWhat)
 	{
-		if (type == "Cookie" && byWhat->type == "Jelly") byWhat->SetObjectLocation(-10000,0);
-		if (type == "Cookie" && byWhat->type == "Coin") byWhat->SetObjectLocation(-10000,0);
+		if (type == "Cookie" && byWhat->type == "Jelly") byWhat->SetObjectLocation(-1000, 0);
+		if (type == "Cookie" && byWhat->type == "Coin") byWhat->SetObjectLocation(-10000, 0);
+		if (type == "Cookie" && byWhat->type == "GoldCoin") byWhat->SetObjectLocation(-10000, 0);
+		if (type == "Cookie" && byWhat->type == "Big") {
+			byWhat->SetObjectLocation(-10000, 0);
+			BigMode = true;
+		}
+		if (type == "Cookie" && byWhat->type == "Fast") {
+			byWhat->SetObjectLocation(-10000, 0);
+			FastMode = true;
+		}
+		if (type == "Cookie" && byWhat->type == "Magnet") {
+			byWhat->SetObjectLocation(-10000, 0);
+			MagnetMode = true;
+		}
+		if (type == "Cookie" && byWhat->type == "Energy") {
+			byWhat->SetObjectLocation(-10000, 0);
+		}
 
 
 
