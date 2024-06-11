@@ -62,6 +62,8 @@ void MakeBridge();
 void MakeBackGround1();
 void MakeBackGround2();
 void MakeObstacles();
+void MakeCoin();
+void MakeJelly();
 void MakeGrid(HDC mdc);
 RECT Grid[28][28];
 int jellytype{ General };
@@ -141,8 +143,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		break;
 
 	case WM_LBUTTONDOWN:
-	/*	MouseLeftDownEvent(lParam);
-		InvalidateRect(hWnd, NULL, false);*/
+		MouseLeftDownEvent(lParam);
+		InvalidateRect(hWnd, NULL, false);
 		break;
 	case WM_LBUTTONUP:
 		MouseLeftUpEvent(lParam);
@@ -204,17 +206,19 @@ void Initialize() {
 	float width = WINDOW_WIDTH / 28;
 	float height = WINDOW_HEIGHT / 20;
 
-	/*for (int i = 0; i < 28; ++i) {
+	for (int i = 0; i < 28; ++i) {
 		for (int j = 0; j < 28; ++j) {
 			Grid[i][j] = { i * (int)width ,j * (int)height ,i * (int)width + (int)width,j * (int)height + (int)height };
 			board[i][j].realX = Grid[i][j].left;
 		}
-	}*/
+	}
 
 	MakeBackGround2();
 	MakeBackGround1();
 	MakeBridge();
 	MakeObstacles();
+	MakeJelly();
+	MakeCoin();
 	Player = ObjectMgr.AddObject("Cookie", ImageL.I_AngelCookie, 1, 200, 350);
 
 }
@@ -320,6 +324,45 @@ void MakeObstacles()
 	ifs.close();
 	ifs.clear();
 
+}
+
+void MakeCoin()
+{
+	std::ifstream ifs;
+	ifs.open("make_big_coin.txt");
+	int pos_x{};
+	int pos_y{};
+
+	while (ifs >> pos_x>> pos_y) {
+		ObjectMgr.AddObject("Coin", ImageL.I_BigCoin, 1, pos_x, pos_y);
+	}
+
+	ifs.close();
+	ifs.clear();
+
+	ifs.open("make_silver_coin.txt");
+
+	while (ifs >> pos_x >> pos_y) {
+		ObjectMgr.AddObject("Coin", ImageL.I_SilverCoin, 1, pos_x, pos_y);
+	}
+
+	ifs.close();
+	ifs.clear();
+
+	ifs.open("make_gold_coin.txt");
+
+	while (ifs >> pos_x >> pos_y) {
+		ObjectMgr.AddObject("GoldCoin", ImageL.I_GoldCoin, 1, pos_x, pos_y);
+	}
+
+}
+
+void MakeJelly()
+{
+	std::ifstream ifs;
+	int pos_x{};
+	int pos_y{};
+
 	ifs.open("make_general_jelly.txt");
 
 	while (ifs >> pos_x >> pos_y) {
@@ -353,6 +396,8 @@ void MakeObstacles()
 		ObjectMgr.AddObject("Jelly", ImageL.I_PinkBear, 1, pos_x, pos_y);
 	}
 
+	ifs.close();
+	ifs.clear();
 }
 
 void MakeBackGround1()
@@ -387,6 +432,15 @@ void KeyDownEvents(HWND hWnd, WPARAM wParam) {
 		break;
 	case '4':
 		jellytype = BigBear;
+		break;
+	case '5':
+		jellytype = SilverCoin;
+		break;
+	case '6':
+		jellytype = GoldCoin;
+		break;
+	case '7':
+		jellytype = BigCoin;
 		break;
 
 	case VK_UP:
@@ -491,6 +545,9 @@ void MouseLeftDownEvent(LPARAM lParam) {
 
 	float width = WINDOW_WIDTH / 28;
 
+	//std::ofstream ofs;
+	//ofs.open("make_gold_coin.txt", std::ios::app);
+
 	float pos_x1{};
 	int pos_y1{};
 
@@ -516,6 +573,15 @@ void MouseLeftDownEvent(LPARAM lParam) {
 					break;
 				case BigBear:
 					ObjectMgr.AddObject("Jelly", ImageL.I_BigBear, 1, Grid[i][j].left, Grid[i][j].top);
+					break;
+				case SilverCoin:
+					ObjectMgr.AddObject("Coin", ImageL.I_SilverCoin, 1, Grid[i][j].left, Grid[i][j].top);
+					break;
+				case GoldCoin:
+					ObjectMgr.AddObject("Coin", ImageL.I_GoldCoin, 1, Grid[i][j].left, Grid[i][j].top);
+					break;
+				case BigCoin:
+					ObjectMgr.AddObject("Coin", ImageL.I_BigCoin, 1, Grid[i][j].left, Grid[i][j].top);
 					break;
 				}
 		}

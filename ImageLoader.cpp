@@ -23,4 +23,7 @@ void ImageLoader::LoadAllImage()
 	I_YellowBear.Load(L".\\CookieRun_Resource\\YellowBear.png");
 	I_PinkBear.Load(L".\\CookieRun_Resource\\PinkBear.png");
 	I_BigBear.Load(L".\\CookieRun_Resource\\BigBear.png");
+	I_SilverCoin.Load(L".\\CookieRun_Resource\\SilverCoin.png");
+	I_GoldCoin.Load(L".\\CookieRun_Resource\\GoldCoin.png");
+	I_BigCoin.Load(L".\\CookieRun_Resource\\BigCoin.png");
 }

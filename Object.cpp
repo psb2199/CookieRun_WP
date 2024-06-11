@@ -182,10 +182,17 @@ void Object::BeginEvents()
 		SetObjectVertexLocation(pos_x, pos_y, pos_x + ratio1, pos_y + ratio2);
 		SetCollisionBox(ObjectImage.GetWidth() / 2, ObjectImage.GetWidth() / 2, ObjectImage.GetHeight() / 2, ObjectImage.GetHeight() / 2);
 	}
-	else if (type == "Jelly")
+	else if (type == "Jelly" || type == "Coin")
 	{
 		float ratio1 = ObjectImage.GetWidth() / 1.6;
 		float ratio2 = ObjectImage.GetHeight() / 1.6;
+		SetObjectVertexLocation(pos_x, pos_y, pos_x + ratio1, pos_y + ratio2);
+		SetCollisionBox(ObjectImage.GetWidth() / 2, ObjectImage.GetWidth() / 2, ObjectImage.GetHeight() / 2, ObjectImage.GetHeight() / 2);
+	}
+	else if (type == "GoldCoin")
+	{
+		float ratio1 = ObjectImage.GetWidth() / 1.8;
+		float ratio2 = ObjectImage.GetHeight() / 1.8;
 		SetObjectVertexLocation(pos_x, pos_y, pos_x + ratio1, pos_y + ratio2);
 		SetCollisionBox(ObjectImage.GetWidth() / 2, ObjectImage.GetWidth() / 2, ObjectImage.GetHeight() / 2, ObjectImage.GetHeight() / 2);
 	}
@@ -207,7 +214,7 @@ void Object::TickEvents()
 		float speed = 2;
 		AddObjectMovement(-speed, 0);
 	}
-	else if (type == "Bridge" || type == "Sliding1" || type == "Jump" || type == "Jelly")
+	else if (type == "Bridge" || type == "Sliding1" || type == "Jump" || type == "Jelly" || type == "Coin" || type == "GoldCoin")
 	{
 		float speed = 6;
 		AddObjectMovement(-speed, 0);
@@ -219,9 +226,10 @@ void Object::CollisionEvent(Object* byWhat)
 	if (byWhat)
 	{
 		if (type == "Cookie" && byWhat->type == "Jelly") byWhat->SetObjectLocation(-10000,0);
+		if (type == "Cookie" && byWhat->type == "Coin") byWhat->SetObjectLocation(-10000,0);
 
 
-		
+
 	}
 	else
 	{

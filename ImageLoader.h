@@ -23,5 +23,8 @@ public:
 	CImage I_YellowBear;
 	CImage I_PinkBear;
 	CImage I_BigBear;
+	CImage I_SilverCoin;
+	CImage I_GoldCoin;
+	CImage I_BigCoin;
 };
 

@@ -22,3 +22,6 @@
 #define YellowBear 2
 #define PinkBear 3
 #define BigBear 4
+#define SilverCoin 5
+#define GoldCoin 6
+#define BigCoin 7
