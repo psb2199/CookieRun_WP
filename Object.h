@@ -2,6 +2,7 @@
 #include <iostream>
 #include <Windows.h>
 #include <atlimage.h>
+#include <chrono>
 
 #include "Draw.h"
 
@@ -24,7 +25,7 @@ public:
 	void CollisionEvent(Object* byWhat);
 
 	void DrawObject(HDC m_mDC);
-	void DrawObjectImage(HDC mdc);
+	void DrawObjectImage(HDC mdc, HDC hDC);
 
 	float GetDirectaion();
 
@@ -40,7 +41,7 @@ private:
 	bool DebugMode{ false };
 
 public:
-	std::string type;
+	int type;
 	CImage ObjectImage;
 	float pos_x;
 	float pos_y;
@@ -54,10 +55,14 @@ public:
 	int image_raw;
 	int image_col;
 
+	float item_time{ 0 };
+
 	bool isJumping{ false };
 	bool MagnetMode{ false };
 	bool FastMode{ false };
 	bool BigMode{ false };
+	bool InvincibilityMode{ false };
+	bool isPassed{ false };
 
 	Object* next;
 	Object* prev;

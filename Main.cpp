@@ -17,7 +17,7 @@ LPCTSTR lpszWindowName = L"CookieRun";
 LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam);
 
 void Initialize();
-void DrawObject(HDC mdc);
+void DrawObject(HDC mdc, HDC hDC);
 void TickEvent();
 void CheckCollision(Object* obj);
 void MagnetMode(Object* obj);
@@ -169,7 +169,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		mDC = CreateCompatibleDC(hDC);
 		(HBITMAP)SelectObject(mDC, hBitmap);
 
-		DrawObject(mDC);
+		DrawObject(mDC, hDC);
 		//MakeGrid(mDC);
 
 		BitBlt(hDC, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, mDC, 0, 0, SRCCOPY);
@@ -184,6 +184,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		break;
 
 	case WM_TIMER:
+
 		if (PlayMode) {
 			GameTime += DELTA_TIME;
 			TickEvent();
@@ -220,7 +221,7 @@ void Initialize() {
 	MakeObstacles();
 	MakeJelly();
 	MakeCoin();
-	Player = ObjectMgr.AddObject("Cookie", ImageL.I_AngelCookie, 1, 200, 350);
+	Player = ObjectMgr.AddObject(Cookie, ImageL.I_AngelCookie, 1, 200, 350);
 
 }
 
@@ -236,8 +237,8 @@ void MakeGrid(HDC mdc) {
 }
 
 
-void DrawObject(HDC mdc) {
-	ObjectMgr.DrawAll(mdc);
+void DrawObject(HDC mdc, HDC hDC) {
+	ObjectMgr.DrawAll(mdc, hDC);
 }
 
 void TickEvent() {
@@ -280,7 +281,7 @@ void MakeBridge()
 	int pos_x{};
 
 	while (ifs >> pos_x) {
-		ObjectMgr.AddObject("Bridge", ImageL.I_Bridge1, 1, pos_x, 550);
+		ObjectMgr.AddObject(Bridge, ImageL.I_Bridge1, 1, pos_x, 550);
 
 	}
 }
@@ -293,7 +294,7 @@ void MakeObstacles()
 	int pos_y{};
 
 	while (ifs >> pos_x) {
-		ObjectMgr.AddObject("Obstacle_S", ImageL.I_Sd1, 1, pos_x - 70, 170);
+		ObjectMgr.AddObject(Obstacle_S, ImageL.I_Sd1, 1, pos_x - 70, 170);
 	}
 
 	ifs.close();
@@ -302,7 +303,7 @@ void MakeObstacles()
 	ifs.open("Jump2_Green.txt");
 
 	while (ifs >> pos_x) {
-		ObjectMgr.AddObject("Obstacle_J", ImageL.I_jp2A, 1, pos_x, 340);
+		ObjectMgr.AddObject(Obstacle_J, ImageL.I_jp2A, 1, pos_x, 340);
 	}
 
 	ifs.close();
@@ -311,7 +312,7 @@ void MakeObstacles()
 	ifs.open("Jump2_Pink.txt");
 
 	while (ifs >> pos_x) {
-		ObjectMgr.AddObject("Obstacle_J", ImageL.I_jp2B, 1, pos_x, 340);
+		ObjectMgr.AddObject(Obstacle_J, ImageL.I_jp2B, 1, pos_x, 340);
 	}
 
 	ifs.close();
@@ -320,7 +321,7 @@ void MakeObstacles()
 	ifs.open("Jump1.txt");
 
 	while (ifs >> pos_x) {
-		ObjectMgr.AddObject("Obstacle_J", ImageL.I_jp1A, 1, pos_x, 410);
+		ObjectMgr.AddObject(Obstacle_J, ImageL.I_jp1A, 1, pos_x, 410);
 	}
 
 	ifs.close();
@@ -336,7 +337,7 @@ void MakeCoin()
 	int pos_y{};
 
 	while (ifs >> pos_x >> pos_y) {
-		ObjectMgr.AddObject("Coin", ImageL.I_BigCoin, 1, pos_x, pos_y);
+		ObjectMgr.AddObject(Coin, ImageL.I_BigCoin, 1, pos_x, pos_y);
 	}
 
 	ifs.close();
@@ -345,7 +346,7 @@ void MakeCoin()
 	ifs.open("make_silver_coin.txt");
 
 	while (ifs >> pos_x >> pos_y) {
-		ObjectMgr.AddObject("Coin", ImageL.I_SilverCoin, 1, pos_x, pos_y);
+		ObjectMgr.AddObject(Coin, ImageL.I_SilverCoin, 1, pos_x, pos_y);
 	}
 
 	ifs.close();
@@ -354,7 +355,7 @@ void MakeCoin()
 	ifs.open("make_gold_coin.txt");
 
 	while (ifs >> pos_x >> pos_y) {
-		ObjectMgr.AddObject("GoldCoin", ImageL.I_GoldCoin, 1, pos_x, pos_y);
+		ObjectMgr.AddObject(Coin, ImageL.I_GoldCoin, 1, pos_x, pos_y);
 	}
 
 }
@@ -368,7 +369,7 @@ void MakeJelly()
 	ifs.open("make_general_jelly.txt");
 
 	while (ifs >> pos_x >> pos_y) {
-		ObjectMgr.AddObject("Jelly", ImageL.I_CommonJelly, 1, pos_x, pos_y);
+		ObjectMgr.AddObject(Jelly, ImageL.I_CommonJelly, 1, pos_x, pos_y);
 	}
 
 	ifs.close();
@@ -377,7 +378,7 @@ void MakeJelly()
 	ifs.open("make_yellow_bear_jelly.txt");
 
 	while (ifs >> pos_x >> pos_y) {
-		ObjectMgr.AddObject("Jelly", ImageL.I_YellowBear, 1, pos_x, pos_y);
+		ObjectMgr.AddObject(Jelly, ImageL.I_YellowBear, 1, pos_x, pos_y);
 	}
 
 	ifs.close();
@@ -386,7 +387,7 @@ void MakeJelly()
 	ifs.open("make_big_bear_jelly.txt");
 
 	while (ifs >> pos_x >> pos_y) {
-		ObjectMgr.AddObject("Jelly", ImageL.I_BigBear, 1, pos_x, pos_y);
+		ObjectMgr.AddObject(Jelly, ImageL.I_BigBear, 1, pos_x, pos_y);
 	}
 
 	ifs.close();
@@ -395,7 +396,7 @@ void MakeJelly()
 	ifs.open("make_pink_bear_jelly.txt");
 
 	while (ifs >> pos_x >> pos_y) {
-		ObjectMgr.AddObject("Jelly", ImageL.I_PinkBear, 1, pos_x, pos_y);
+		ObjectMgr.AddObject(Jelly, ImageL.I_PinkBear, 1, pos_x, pos_y);
 	}
 
 	ifs.close();
@@ -404,19 +405,19 @@ void MakeJelly()
 	ifs.open("energy.txt");
 
 	while (ifs >> pos_x >> pos_y) {
-		ObjectMgr.AddObject("Energy", ImageL.I_Energyitem, 1, pos_x, pos_y);
+		ObjectMgr.AddObject(Energy, ImageL.I_Energyitem, 1, pos_x, pos_y);
 	}
 
 	ifs.close();
 	ifs.clear();
 
-	ObjectMgr.AddObject("Big", ImageL.I_Bigitem, 1, 2653, 360);
-	ObjectMgr.AddObject("Big", ImageL.I_Bigitem, 1, 8539, 360);
+	ObjectMgr.AddObject(Big, ImageL.I_Bigitem, 1, 2653, 360);
+	ObjectMgr.AddObject(Big, ImageL.I_Bigitem, 1, 34037, 390);
 
-	ObjectMgr.AddObject("Fast", ImageL.I_Fastitem, 1, 13281, 360);
-	ObjectMgr.AddObject("Fast", ImageL.I_Fastitem, 1, 15126, 390);
-	ObjectMgr.AddObject("Fast", ImageL.I_Fastitem, 1, 17964, 330);
-	ObjectMgr.AddObject("Fast", ImageL.I_Fastitem, 1, 34037, 390);
+	ObjectMgr.AddObject(Fast, ImageL.I_Fastitem, 1, 8539, 360);
+	ObjectMgr.AddObject(Fast, ImageL.I_Fastitem, 1, 13281, 360);
+	ObjectMgr.AddObject(Fast, ImageL.I_Fastitem, 1, 15126, 390);
+	ObjectMgr.AddObject(Fast, ImageL.I_Fastitem, 1, 17964, 330);
 }
 
 void MakeBackGround1()
@@ -424,15 +425,15 @@ void MakeBackGround1()
 	float h = ImageL.I_BackGround.GetHeight();
 	float ratio = WINDOW_HEIGHT / h;
 	for (int i = 0; i < 20; ++i)
-		ObjectMgr.AddObject("BackGround", ImageL.I_BackGround, 1, WINDOW_WIDTH * ratio * i, 0);
+		ObjectMgr.AddObject(Background, ImageL.I_BackGround, 1, WINDOW_WIDTH * ratio * i, 0);
 }
 
 void MakeBackGround2()
 {
 	float h = ImageL.I_BackGround2.GetHeight();
 	float ratio = WINDOW_HEIGHT / h;
-	for (int i = 0; i < 7; ++i)
-		ObjectMgr.AddObject("BackGround2", ImageL.I_BackGround2, 1, WINDOW_WIDTH * ratio * i, 0);
+	for (int i = 0; i < 10; ++i)
+		ObjectMgr.AddObject(Background2, ImageL.I_BackGround2, 1, WINDOW_WIDTH * ratio * i, 0);
 }
 
 
@@ -590,34 +591,34 @@ void MouseLeftDownEvent(LPARAM lParam) {
 				Grid[i][j].right >= MOUSE.x && Grid[i][j].bottom >= MOUSE.y)
 				switch (jellytype) {
 				case General:
-					ObjectMgr.AddObject("Jelly", ImageL.I_CommonJelly, 1, Grid[i][j].left, Grid[i][j].top);
+					ObjectMgr.AddObject(Jelly, ImageL.I_CommonJelly, 1, Grid[i][j].left, Grid[i][j].top);
 					break;
 				case YellowBear:
-					ObjectMgr.AddObject("Jelly", ImageL.I_YellowBear, 1, Grid[i][j].left, Grid[i][j].top);
+					ObjectMgr.AddObject(Jelly, ImageL.I_YellowBear, 1, Grid[i][j].left, Grid[i][j].top);
 					break;
 				case PinkBear:
-					ObjectMgr.AddObject("Jelly", ImageL.I_PinkBear, 1, Grid[i][j].left, Grid[i][j].top);
+					ObjectMgr.AddObject(Jelly, ImageL.I_PinkBear, 1, Grid[i][j].left, Grid[i][j].top);
 					break;
 				case BigBear:
-					ObjectMgr.AddObject("Jelly", ImageL.I_BigBear, 1, Grid[i][j].left, Grid[i][j].top);
+					ObjectMgr.AddObject(Jelly, ImageL.I_BigBear, 1, Grid[i][j].left, Grid[i][j].top);
 					break;
 				case SilverCoin:
-					ObjectMgr.AddObject("Coin", ImageL.I_SilverCoin, 1, Grid[i][j].left, Grid[i][j].top);
+					ObjectMgr.AddObject(Coin, ImageL.I_SilverCoin, 1, Grid[i][j].left, Grid[i][j].top);
 					break;
 				case GoldCoin:
-					ObjectMgr.AddObject("Coin", ImageL.I_GoldCoin, 1, Grid[i][j].left, Grid[i][j].top);
+					ObjectMgr.AddObject(Coin, ImageL.I_GoldCoin, 1, Grid[i][j].left, Grid[i][j].top);
 					break;
 				case BigCoin:
-					ObjectMgr.AddObject("GoldCoin", ImageL.I_BigCoin, 1, Grid[i][j].left, Grid[i][j].top);
+					ObjectMgr.AddObject(Coin, ImageL.I_BigCoin, 1, Grid[i][j].left, Grid[i][j].top);
 					break;
 				case BigItem:
-					ObjectMgr.AddObject("Big", ImageL.I_Bigitem, 1, Grid[i][j].left, Grid[i][j].top);
+					ObjectMgr.AddObject(Big, ImageL.I_Bigitem, 1, Grid[i][j].left, Grid[i][j].top);
 					break;
 				case FastItem:
-					ObjectMgr.AddObject("Fast", ImageL.I_Fastitem, 1, Grid[i][j].left, Grid[i][j].top);
+					ObjectMgr.AddObject(Fast, ImageL.I_Fastitem, 1, Grid[i][j].left, Grid[i][j].top);
 					break;
 				case EnergyItem:
-					ObjectMgr.AddObject("Energy", ImageL.I_Energyitem, 1, Grid[i][j].left, Grid[i][j].top);
+					ObjectMgr.AddObject(Energy, ImageL.I_Energyitem, 1, Grid[i][j].left, Grid[i][j].top);
 					break;
 				}
 		}
@@ -642,12 +643,16 @@ void MouseRightUpEvent(LPARAM lParam) {
 void MagnetMode(Object* obj)
 {
 
-	if (obj->type == "Jelly" || obj->type == "Coin" || obj->type == "GoldCoin"||
-		obj->type == "Big" || obj->type == "Fast" || obj->type == "Energy" && obj != Player)
+	if (obj->type == Jelly || obj->type == Coin || obj->type == Goldcoin ||
+		obj->type == Big || obj->type == Fast || obj->type == Energy && obj != Player)
 	{
 		if (obj->CollisionBox.right < WINDOW_WIDTH / 2 && obj->CollisionBox.top < Player->CollisionBox.top)
 		{
-			obj->AddObjectMovement(-10, 10);
+			obj->AddObjectMovement(-10, 15);
+		}
+		else if (obj->CollisionBox.right < WINDOW_WIDTH / 2 && obj->CollisionBox.bottom > Player->CollisionBox.bottom)
+		{
+			obj->AddObjectMovement(-8, -8);
 		}
 		else if (obj->CollisionBox.right < WINDOW_WIDTH / 2 && obj->CollisionBox.top > Player->CollisionBox.top)
 		{
@@ -677,6 +682,8 @@ void CheckCollision(Object* obj)
 			{
 				FlagCollision = true;
 				obj->CollisionEvent(ptr);
+
+
 			}
 		}
 

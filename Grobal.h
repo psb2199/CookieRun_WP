@@ -3,6 +3,7 @@
 #define WINDOW_HEIGHT 600
 #define DELTA_TIME 0.008
 
+// state
 #define ANI_idle 0
 #define ANI_running 1
 #define ANI_jumping 2
@@ -16,6 +17,18 @@
 #define Cookie 1
 #define Background 2
 #define Background2 3
+#define Obstacle_J 4
+#define Obstacle_S 5
+#define Big 6
+#define Fast 7
+#define Jelly 8
+#define Coin 9
+#define Goldcoin 13
+#define Bridge 10
+#define Energy 11
+#define Magnet 12
+
+
 
 #define Bridge_width 120
 

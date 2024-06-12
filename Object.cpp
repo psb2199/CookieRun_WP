@@ -3,8 +3,28 @@
 #include "MyH.h"
 #include "ImageLoader.h"
 #include <iostream>
+#include <chrono>
+#include <gdiplus.h>
+#pragma comment(lib, "gdiplus.lib")
+
+using namespace Gdiplus;
+
+// GDI+ 초기화
+void InitGDIPlus(ULONG_PTR* gdiplusToken)
+{
+	GdiplusStartupInput gdiplusStartupInput;
+	GdiplusStartup(gdiplusToken, &gdiplusStartupInput, NULL);
+}
+
+// GDI+ 종료
+void ShutdownGDIPlus(ULONG_PTR gdiplusToken)
+{
+	GdiplusShutdown(gdiplusToken);
+}
+
 
 #include "Grobal.h"
+int add_speed = 1;
 
 Object::Object()
 {
@@ -37,13 +57,13 @@ Object::Object()
 Object::~Object()
 {
 }
-void Object::DrawObjectImage(HDC mdc)
+void Object::DrawObjectImage(HDC mdc, HDC hDC)
 {
 	//이미지의 어느부분을 보여주게 할건지 여기서 정함
 	int showRange{ WINDOW_WIDTH };
 	if (-showRange < pos_x && pos_x < WINDOW_WIDTH + showRange)
 	{
-		if (type == "Cookie")
+		if (type == Cookie)
 		{
 			int sprite_size = 319; // 프레임 하나의 사이즈
 			int line_size = 3; // 프레임과 프레임 사이의 선 사이즈
@@ -73,6 +93,10 @@ void Object::DrawObjectImage(HDC mdc)
 			case ANI_sliding_up:
 				image_raw = 0;
 				image_col = 14;
+				break;
+			case ANI_collision:
+				image_raw = 5;
+				image_col = 6;
 				break;
 			}
 
@@ -114,13 +138,50 @@ void Object::DrawObjectImage(HDC mdc)
 					ani_state = ANI_running;
 				}
 				break;
+			case ANI_collision:
+				if (animation_time == 0)
+				{
+					animation_time = 3;
+				}
+				else if (animation_time == 1) {
+					animation_time = 2;
+				}
+				else
+				{
+					ani_state = ANI_running;
+				}
+				break;
 			}
 
-			if (BigMode) 
+			if (BigMode)
 			{
 				ObjectImage.Draw(mdc,
-					image.left-100, image.top-130, (image.right - image.left)*1.5, (image.bottom - image.top)*1.5, // x, y, 넓이, 높이,
+					image.left - 80, image.top - 130, (image.right - image.left) * 1.5, (image.bottom - image.top) * 1.5, // x, y, 넓이, 높이,
 					line_size * animation_time + animation_time * sprite_size + 2, line_size * (image_raw + 1) + sprite_size * image_raw, sprite_size, sprite_size); // 이미지 내의 좌표
+			}
+			else if (InvincibilityMode)
+			{
+				Graphics graphics(mdc);
+				Image img(L".\\CookieRun_Resource\\cookie\\Angel Cookie.png");
+
+				// 반투명 렌더링을 위해 이미지 속성 설정
+				ColorMatrix colorMatrix = {
+					1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+					0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+					0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+					0.0f, 0.0f, 0.0f, (float)100 / 255.0f, 0.0f,
+					0.0f, 0.0f, 0.0f, 0.0f, 1.0f
+				};
+
+				ImageAttributes imageAttributes;
+				imageAttributes.SetColorMatrix(&colorMatrix, ColorMatrixFlagsDefault, ColorAdjustTypeBitmap);
+
+				// 이미지 출력
+				graphics.DrawImage(
+					&img,
+					Rect(image.left, image.top, (image.right - image.left), (image.bottom - image.top)),
+					line_size * animation_time + animation_time * sprite_size + 2, line_size * (image_raw + 1) + sprite_size * image_raw,
+					sprite_size, sprite_size, UnitPixel, &imageAttributes);
 			}
 			else
 			{
@@ -131,7 +192,7 @@ void Object::DrawObjectImage(HDC mdc)
 
 
 		}
-		else if (type == "BackGround" || type == "BackGround2")
+		else if (type == Background || type == Background2)
 		{
 			ObjectImage.Draw(mdc,
 				image.left, image.top, image.right - image.left, image.bottom - image.top, // x, y, 넓이, 높이,
@@ -158,7 +219,7 @@ void Object::BeginEvents()
 {
 	// 오브젝트가 처음 월드에 생성 되었을 때 한번만 발생하는 이벤트
 
-	if (type == "Cookie")
+	if (type == Cookie)
 	{
 		float m_size = 140;
 		original_y = pos_y;
@@ -170,51 +231,51 @@ void Object::BeginEvents()
 		MagnetMode = true;
 		count_jump = 0;
 	}
-	else if (type == "BackGround" || type == "BackGround2")
+	else if (type == Background || type == Background2)
 	{
 		float h = ObjectImage.GetHeight();
 		float ratio = WINDOW_HEIGHT / h;
 
 		SetObjectVertexLocation(pos_x, pos_y, pos_x + WINDOW_WIDTH * ratio, pos_y + WINDOW_HEIGHT);
 	}
-	else if (type == "Bridge")
+	else if (type == Bridge)
 	{
 		float m_size = 60;
 		SetObjectVertexLocation(pos_x - m_size * size, pos_y - m_size * size, pos_x + m_size * size, pos_y + m_size * size);
 		SetCollisionBox(ObjectImage.GetWidth() / 2, ObjectImage.GetWidth() / 2, ObjectImage.GetHeight() / 2, ObjectImage.GetHeight() / 2);
 	}
-	else if (type == "Obstacle_J")
+	else if (type == Obstacle_J)
 	{
 		float ratio1 = ObjectImage.GetWidth() / 1.6;
 		float ratio2 = ObjectImage.GetHeight() / 1.6;
 		SetObjectVertexLocation(pos_x, pos_y, pos_x + ratio1, pos_y + ratio2);
 		SetCollisionBox(ObjectImage.GetWidth() / 3, ObjectImage.GetWidth() / 3, ObjectImage.GetHeight() / 3, ObjectImage.GetHeight() / 3);
 	}
-	else if (type == "Obstacle_S")
+	else if (type == Obstacle_S)
 	{
 		float ratio1 = ObjectImage.GetWidth() / 1.17;
 		float ratio2 = ObjectImage.GetHeight() / 1.17;
 		SetObjectVertexLocation(pos_x, 0, pos_x + ratio1, 0 + ratio2);
 		SetCollisionBox(ObjectImage.GetWidth() / 3, ObjectImage.GetWidth() / 3, ObjectImage.GetHeight() / 3, ObjectImage.GetHeight() / 3);
 	}
-	else if (type == "Jelly" || type == "Coin")
+	else if (type == Jelly || type == Coin)
 	{
 		float ratio1 = ObjectImage.GetWidth() / 1.6;
 		float ratio2 = ObjectImage.GetHeight() / 1.6;
 		SetObjectVertexLocation(pos_x, pos_y, pos_x + ratio1, pos_y + ratio2);
 		SetCollisionBox(ObjectImage.GetWidth() / 4, ObjectImage.GetWidth() / 4, ObjectImage.GetHeight() / 4, ObjectImage.GetHeight() / 4);
 	}
-	else if (type == "GoldCoin")
+	else if (type == Goldcoin)
 	{
-		float ratio1 = ObjectImage.GetWidth() / 1.8;
-		float ratio2 = ObjectImage.GetHeight() / 1.8;
+		float ratio1 = ObjectImage.GetWidth() / 2.0;
+		float ratio2 = ObjectImage.GetHeight() / 2.0;
 		SetObjectVertexLocation(pos_x, pos_y, pos_x + ratio1, pos_y + ratio2);
 		SetCollisionBox(ObjectImage.GetWidth() / 4, ObjectImage.GetWidth() / 4, ObjectImage.GetHeight() / 4, ObjectImage.GetHeight() / 4);
 	}
-	else if (type == "Big" || type == "Fast" || type == "Energy" || type == "Magnet")
+	else if (type == Big || type == Fast || type == Energy || type == Magnet)
 	{
-		float ratio1 = ObjectImage.GetWidth() / 2.3;
-		float ratio2 = ObjectImage.GetHeight() / 2.3;
+		float ratio1 = ObjectImage.GetWidth() / 2.1;
+		float ratio2 = ObjectImage.GetHeight() / 2.1;
 		SetObjectVertexLocation(pos_x, pos_y, pos_x + ratio1, pos_y + ratio2);
 		SetCollisionBox(ObjectImage.GetWidth() / 5, ObjectImage.GetWidth() / 5, ObjectImage.GetHeight() / 5, ObjectImage.GetHeight() / 5);
 	}
@@ -226,30 +287,57 @@ void Object::TickEvents()
 	// 주기적으로 계속 발생하는 이벤트(주기는 0.008초) 
 	UpdateCollisionBox();
 
-	if (type == "BackGround")
+	if (InvincibilityMode == true) {
+		item_time += DELTA_TIME;
+		add_speed = 2;
+		if (item_time > 1) {
+			InvincibilityMode = false;
+			add_speed = 1;
+			item_time = 0;
+		}
+	}
+	if (BigMode == true) {
+		item_time += DELTA_TIME;
+
+		if (item_time > 2.2) {
+			BigMode = false;
+			item_time = 0;
+		}
+	}
+	if (FastMode == true) {
+		item_time += DELTA_TIME;
+		add_speed = 2;
+		if (item_time > 2.2) {
+			FastMode = false;
+			add_speed = 1;
+			item_time = 0;
+		}
+	}
+
+	if (type == Background)
 	{
-		float speed = 6;
+		float speed = 8 * add_speed;
 		AddObjectMovement(-speed, 0);
 	}
-	else if (type == "BackGround2")
+	else if (type == Background2)
 	{
-		float speed = 2;
+		float speed = 4 * add_speed;
 		AddObjectMovement(-speed, 0);
 	}
-	else if (type == "Bridge" || type == "Obstacle_J" || type == "Obstacle_S")
+	else if (type == Bridge || type == Obstacle_J || type == Obstacle_S)
 	{
-		float speed = 6;
+		float speed = 8 * add_speed;
 		AddObjectMovement(-speed, 0);
 	}
-	else if (type == "Jelly" || type == "Coin" || type == "GoldCoin")
+	else if (type == Jelly || type == Coin || type == Goldcoin)
 	{
-		float speed = 6;
+		float speed = 8 * add_speed;
 		AddObjectMovement(-speed, 0);
 
 	}
-	else if (type == "Big" || type == "Fast" || type == "Energy")
+	else if (type == Big || type == Fast || type == Energy)
 	{
-		float speed = 6;
+		float speed = 8 * add_speed;
 		AddObjectMovement(-speed, 0);
 
 	}
@@ -257,25 +345,50 @@ void Object::TickEvents()
 
 void Object::CollisionEvent(Object* byWhat)
 {
-	if (byWhat)
+	if (byWhat && byWhat->isPassed == false)
 	{
-		if (type == "Cookie" && byWhat->type == "Jelly") byWhat->SetObjectLocation(-1000, 0);
-		if (type == "Cookie" && byWhat->type == "Coin") byWhat->SetObjectLocation(-10000, 0);
-		if (type == "Cookie" && byWhat->type == "GoldCoin") byWhat->SetObjectLocation(-10000, 0);
-		if (type == "Cookie" && byWhat->type == "Big") {
+		if (type == Cookie && byWhat->type == Jelly) {
+			byWhat->SetObjectLocation(-1000, 0);
+			byWhat->isPassed = true;
+		}
+		if (type == Cookie && byWhat->type == Coin || byWhat->type == Goldcoin) {
+			byWhat->SetObjectLocation(-1000, 0);
+			byWhat->isPassed = true;
+		}
+
+		// 장애물 충돌
+		if (type == Cookie && BigMode == true && (byWhat->type == Obstacle_J || byWhat->type == Obstacle_S)) {
 			byWhat->SetObjectLocation(-10000, 0);
+			byWhat->isPassed = true;
+		}
+		if (type == Cookie && InvincibilityMode == false && BigMode == false && FastMode == false
+			&& (byWhat->type == Obstacle_J || byWhat->type == Obstacle_S))
+		{
+			byWhat->isPassed = true;
+			InvincibilityMode = true;
+			m_ElapseTime = 0;
+			ani_state = ANI_collision;
+		}
+
+		// 아이템
+		if (type == Cookie && byWhat->type == Big) {
+			byWhat->SetObjectLocation(-10000, 0);
+			byWhat->isPassed = true;
 			BigMode = true;
 		}
-		if (type == "Cookie" && byWhat->type == "Fast") {
+		if (type == Cookie && byWhat->type == Fast) {
 			byWhat->SetObjectLocation(-10000, 0);
+			byWhat->isPassed = true;
 			FastMode = true;
 		}
-		if (type == "Cookie" && byWhat->type == "Magnet") {
+		if (type == Cookie && byWhat->type == Magnet) {
 			byWhat->SetObjectLocation(-10000, 0);
+			byWhat->isPassed = true;
 			MagnetMode = true;
 		}
-		if (type == "Cookie" && byWhat->type == "Energy") {
+		if (type == Cookie && byWhat->type == Energy) {
 			byWhat->SetObjectLocation(-10000, 0);
+			byWhat->isPassed = true;
 		}
 
 

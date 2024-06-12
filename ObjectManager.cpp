@@ -1,4 +1,5 @@
 #include "ObjectManager.h"
+#include "Grobal.h"
 
 ObjectManager::ObjectManager()
 {
@@ -12,7 +13,7 @@ ObjectManager::~ObjectManager()
 {
 }
 
-Object* ObjectManager::AddObject(std::string type, CImage &image, float size, float x, float y)
+Object* ObjectManager::AddObject(int type, CImage &image, float size, float x, float y)
 {
 	Object* newObject = new Object;
 	newObject->type = type;
@@ -46,7 +47,7 @@ Object* ObjectManager::AddObject(std::string type, CImage &image, float size, fl
 		Tail = newObject;
 	}
 
-	if (newObject->type == "Player")
+	if (newObject->type == Cookie)
 		Player = newObject;
 
 	return newObject;
@@ -90,13 +91,13 @@ void ObjectManager::DeleteAll()
 	Tail = nullptr;
 }
 
-void ObjectManager::DrawAll(HDC mDC)
+void ObjectManager::DrawAll(HDC mDC, HDC hDC)
 {
 	Object* ptr = Head;
 	while (ptr != nullptr)
 	{
 		//ptr->DrawObject(mDC);
-		ptr->DrawObjectImage(mDC);
+		ptr->DrawObjectImage(mDC, hDC);
 
 		ptr = ptr->next;
 	}
