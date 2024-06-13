@@ -8,8 +8,6 @@ Draw::~Draw()
 {
 }
 
-
-
 void Draw::MakeCircle(HDC mDC, float x1, float y1, float x2, float y2, COLORREF incolor, int outlinethickness, COLORREF outcolor)
 {
 	HBRUSH hBrush = CreateSolidBrush(incolor);

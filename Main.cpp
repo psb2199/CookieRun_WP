@@ -56,6 +56,10 @@ ObjectManager ObjectMgr;
 Draw draw;
 Object obj;
 
+int Score{ 0 };
+TCHAR buffer1[80];
+TCHAR buffer2[80];
+
 Object* Player;
 bool DeBugMode{ false };
 void PlayerHandler();
@@ -65,9 +69,10 @@ void MakeBackGround2();
 void MakeObstacles();
 void MakeCoin();
 void MakeJelly();
+void MakeEffect();
 void MakeGrid(HDC mdc);
 RECT Grid[28][28];
-int jellytype{ General };
+int jellytype{ MagnetItem };
 int move_x{};
 
 struct Board {
@@ -163,7 +168,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		}
 		break;
 
-	case WM_PAINT:
+	case WM_PAINT: {
 		hDC = GetDC(hWnd);
 		hBitmap = CreateCompatibleBitmap(hDC, WINDOW_WIDTH, WINDOW_HEIGHT);
 		mDC = CreateCompatibleDC(hDC);
@@ -171,6 +176,19 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 		DrawObject(mDC, hDC);
 		//MakeGrid(mDC);
+
+		AddFontResource(TEXT("CookieRun Bold.ttf"));
+		HFONT currentFont = CreateFont(30, 0, 0, 0, 0, 0, 0, 0, HANGEUL_CHARSET, 0, 0, 0, VARIABLE_PITCH || FF_ROMAN, TEXT("CookieRun Bold"));
+		HFONT oldFont = (HFONT)SelectObject(mDC, currentFont);
+		SetBkMode(mDC, TRANSPARENT);
+		SetTextColor(mDC, RGB(255, 255, 255));
+		wsprintf(buffer1, L"score  %d", Player->score);
+		TextOut(mDC, 700, 30, buffer1, lstrlen(buffer1));
+		wsprintf(buffer2, L"%d", Player->coin);
+		TextOut(mDC, 560, 30, buffer2, lstrlen(buffer2));
+		SelectObject(mDC, oldFont);
+		DeleteObject(currentFont);
+
 
 		BitBlt(hDC, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, mDC, 0, 0, SRCCOPY);
 		TransparentBlt(hDC, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, mDC, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, RGB(0, 0, 0));
@@ -180,8 +198,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		DeleteDC(hDC);
 
 		EndPaint(hWnd, &ps);
-
-		break;
+	}
+				 break;
 
 	case WM_TIMER:
 
@@ -190,8 +208,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 			TickEvent();
 			InvalidateRect(hWnd, NULL, false);
 		}
-		break;
 
+		MakeEffect();
+		break;
 	case WM_DESTROY:
 		DeleteObject(hBitmap);
 		PostQuitMessage(0);
@@ -222,6 +241,11 @@ void Initialize() {
 	MakeJelly();
 	MakeCoin();
 	Player = ObjectMgr.AddObject(Cookie, ImageL.I_AngelCookie, 1, 200, 350);
+	ObjectMgr.AddObject(LifeBar1, ImageL.I_LifeBar1, 1, 40, 32);
+	ObjectMgr.AddObject(LifeBar2, ImageL.I_LifeBar2, 1, 40, 32);
+	ObjectMgr.AddObject(Heart, ImageL.I_Heart, 1, 28, 18);
+	ObjectMgr.AddObject(Pause, ImageL.I_Pause, 1, 920, 30);
+	ObjectMgr.AddObject(Coin_Ikon, ImageL.I_SilverCoin, 1, 500, 30);
 
 }
 
@@ -242,6 +266,12 @@ void DrawObject(HDC mdc, HDC hDC) {
 }
 
 void TickEvent() {
+
+	//if (Player->FastMode == true) {
+	//	ObjectMgr.AddObject(FastEffect, ImageL.I_FastEffect, 1, 0, 350);
+
+	//}
+
 	Object* ptr = ObjectMgr.GetAllObjects();
 
 	while (ptr != nullptr)
@@ -254,9 +284,9 @@ void TickEvent() {
 			ptr->SetDebugMode(DeBugMode);
 			ptr->m_ElapseTime += DELTA_TIME;
 		}
-
 		ptr = ptr->next;
 	}
+
 
 	PlayerHandler();
 }
@@ -337,7 +367,7 @@ void MakeCoin()
 	int pos_y{};
 
 	while (ifs >> pos_x >> pos_y) {
-		ObjectMgr.AddObject(Coin, ImageL.I_BigCoin, 1, pos_x, pos_y);
+		ObjectMgr.AddObject(Coin_B, ImageL.I_BigCoin, 1, pos_x, pos_y);
 	}
 
 	ifs.close();
@@ -346,7 +376,7 @@ void MakeCoin()
 	ifs.open("make_silver_coin.txt");
 
 	while (ifs >> pos_x >> pos_y) {
-		ObjectMgr.AddObject(Coin, ImageL.I_SilverCoin, 1, pos_x, pos_y);
+		ObjectMgr.AddObject(Coin_S, ImageL.I_SilverCoin, 1, pos_x, pos_y);
 	}
 
 	ifs.close();
@@ -355,9 +385,11 @@ void MakeCoin()
 	ifs.open("make_gold_coin.txt");
 
 	while (ifs >> pos_x >> pos_y) {
-		ObjectMgr.AddObject(Coin, ImageL.I_GoldCoin, 1, pos_x, pos_y);
+		ObjectMgr.AddObject(Coin_G, ImageL.I_GoldCoin, 1, pos_x, pos_y);
 	}
 
+	ifs.close();
+	ifs.clear();
 }
 
 void MakeJelly()
@@ -369,7 +401,7 @@ void MakeJelly()
 	ifs.open("make_general_jelly.txt");
 
 	while (ifs >> pos_x >> pos_y) {
-		ObjectMgr.AddObject(Jelly, ImageL.I_CommonJelly, 1, pos_x, pos_y);
+		ObjectMgr.AddObject(GeneralJelly, ImageL.I_CommonJelly, 1, pos_x, pos_y);
 	}
 
 	ifs.close();
@@ -378,7 +410,7 @@ void MakeJelly()
 	ifs.open("make_yellow_bear_jelly.txt");
 
 	while (ifs >> pos_x >> pos_y) {
-		ObjectMgr.AddObject(Jelly, ImageL.I_YellowBear, 1, pos_x, pos_y);
+		ObjectMgr.AddObject(YellowJelly, ImageL.I_YellowBear, 1, pos_x, pos_y);
 	}
 
 	ifs.close();
@@ -387,7 +419,7 @@ void MakeJelly()
 	ifs.open("make_big_bear_jelly.txt");
 
 	while (ifs >> pos_x >> pos_y) {
-		ObjectMgr.AddObject(Jelly, ImageL.I_BigBear, 1, pos_x, pos_y);
+		ObjectMgr.AddObject(BigJelly, ImageL.I_BigBear, 1, pos_x, pos_y);
 	}
 
 	ifs.close();
@@ -396,7 +428,7 @@ void MakeJelly()
 	ifs.open("make_pink_bear_jelly.txt");
 
 	while (ifs >> pos_x >> pos_y) {
-		ObjectMgr.AddObject(Jelly, ImageL.I_PinkBear, 1, pos_x, pos_y);
+		ObjectMgr.AddObject(PinkJelly, ImageL.I_PinkBear, 1, pos_x, pos_y);
 	}
 
 	ifs.close();
@@ -418,6 +450,15 @@ void MakeJelly()
 	ObjectMgr.AddObject(Fast, ImageL.I_Fastitem, 1, 13281, 360);
 	ObjectMgr.AddObject(Fast, ImageL.I_Fastitem, 1, 15126, 390);
 	ObjectMgr.AddObject(Fast, ImageL.I_Fastitem, 1, 17964, 330);
+
+	ObjectMgr.AddObject(Magnet, ImageL.I_Magnetitem, 1, 2669, 390);
+	ObjectMgr.AddObject(Magnet, ImageL.I_Magnetitem, 1, 9288, 390);
+	ObjectMgr.AddObject(Magnet, ImageL.I_Magnetitem, 1, 13119, 360);
+	ObjectMgr.AddObject(Magnet, ImageL.I_Magnetitem, 1, 17322, 360);
+}
+
+void MakeEffect()
+{
 }
 
 void MakeBackGround1()
@@ -503,11 +544,11 @@ void KeyDownEvents(HWND hWnd, WPARAM wParam) {
 		KEY.KeySubtract = true;
 		break;
 	case VK_SPACE:
-		KEY.KeySpace = true;
-		Player->m_ElapseTime = 0;
-		Player->isJumping = true;
-		Player->ani_state = ANI_jumping;
-		Player->count_jump += 1;
+		/*	KEY.KeySpace = true;
+			Player->m_ElapseTime = 0;
+			Player->isJumping = true;
+			Player->ani_state = ANI_jumping;
+			Player->count_jump += 1;*/
 		break;
 
 	case 'J':
@@ -573,8 +614,8 @@ void MouseLeftDownEvent(LPARAM lParam) {
 
 	float width = WINDOW_WIDTH / 28;
 
-	//std::ofstream ofs;
-	//ofs.open("general_jelly.txt", std::ios::app);
+	std::ofstream ofs;
+	ofs.open("general_jelly.txt", std::ios::app);
 
 	float pos_x1{};
 	int pos_y1{};
@@ -620,6 +661,12 @@ void MouseLeftDownEvent(LPARAM lParam) {
 				case EnergyItem:
 					ObjectMgr.AddObject(Energy, ImageL.I_Energyitem, 1, Grid[i][j].left, Grid[i][j].top);
 					break;
+				case MagnetItem:
+					ObjectMgr.AddObject(Magnet, ImageL.I_Magnetitem, 1, Grid[i][j].left, Grid[i][j].top);
+					pos_x1 = board[i][j].realX;
+					pos_y1 = Grid[i][j].top;
+					ofs << pos_x1 << " " << pos_y1 << '\n';
+					break;
 				}
 		}
 	}
@@ -643,7 +690,8 @@ void MouseRightUpEvent(LPARAM lParam) {
 void MagnetMode(Object* obj)
 {
 
-	if (obj->type == Jelly || obj->type == Coin || obj->type == Goldcoin ||
+	if (obj->type == PinkJelly || obj->type == YellowJelly || obj->type == BigJelly || obj->type == GeneralJelly
+		|| obj->type == Coin_S || obj->type == Coin_B || obj->type == Coin_G ||
 		obj->type == Big || obj->type == Fast || obj->type == Energy && obj != Player)
 	{
 		if (obj->CollisionBox.right < WINDOW_WIDTH / 2 && obj->CollisionBox.top < Player->CollisionBox.top)
@@ -652,7 +700,7 @@ void MagnetMode(Object* obj)
 		}
 		else if (obj->CollisionBox.right < WINDOW_WIDTH / 2 && obj->CollisionBox.bottom > Player->CollisionBox.bottom)
 		{
-			obj->AddObjectMovement(-8, -8);
+			obj->AddObjectMovement(-8, -3);
 		}
 		else if (obj->CollisionBox.right < WINDOW_WIDTH / 2 && obj->CollisionBox.top > Player->CollisionBox.top)
 		{
@@ -682,8 +730,6 @@ void CheckCollision(Object* obj)
 			{
 				FlagCollision = true;
 				obj->CollisionEvent(ptr);
-
-
 			}
 		}
 

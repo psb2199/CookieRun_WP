@@ -47,6 +47,10 @@ public:
 	float pos_y;
 	float size;
 
+	int score{ 0 };
+	int coin{ 0 };
+	int hp{ 100 };
+
 	float m_ElapseTime;
 	float vel_x;
 	float vel_y;

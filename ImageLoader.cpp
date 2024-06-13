@@ -29,4 +29,10 @@ void ImageLoader::LoadAllImage()
 	I_Bigitem.Load(L".\\CookieRun_Resource\\big_item.png");
 	I_Fastitem.Load(L".\\CookieRun_Resource\\fast_item.png");
 	I_Energyitem.Load(L".\\CookieRun_Resource\\energy_item.png");
+	I_Magnetitem.Load(L".\\CookieRun_Resource\\magnet_item.png");
+	I_FastEffect.Load(L".\\CookieRun_Resource\\FastEffect.png");
+	I_LifeBar1.Load(L".\\CookieRun_Resource\\gaugebg_heart02.png");
+	I_LifeBar2.Load(L".\\CookieRun_Resource\\gauge_heart_orange.png");
+	I_Heart.Load(L".\\CookieRun_Resource\\icon_heartLife.png");
+	I_Pause.Load(L".\\CookieRun_Resource\\puase.png");
 }

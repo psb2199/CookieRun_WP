@@ -13,13 +13,13 @@ ObjectManager::~ObjectManager()
 {
 }
 
-Object* ObjectManager::AddObject(int type, CImage &image, float size, float x, float y)
+Object* ObjectManager::AddObject(int type, CImage& image, float size, float x, float y)
 {
 	Object* newObject = new Object;
 	newObject->type = type;
 	newObject->pos_x = x;
 	newObject->pos_y = y;
-	
+
 	newObject->size = size;
 
 	newObject->ObjectImage = image;
@@ -32,7 +32,7 @@ Object* ObjectManager::AddObject(int type, CImage &image, float size, float x, f
 	newObject->image.top = newObject->pos_y - imageH / 2;
 	newObject->image.bottom = newObject->pos_y + imageH / 2;
 
-	
+
 	newObject->BeginEvents();
 	newObject->next = nullptr; // 새로운 노드의 다음 노드는 없음
 
@@ -94,13 +94,14 @@ void ObjectManager::DeleteAll()
 void ObjectManager::DrawAll(HDC mDC, HDC hDC)
 {
 	Object* ptr = Head;
-	while (ptr != nullptr)
+	while (ptr != nullptr )
 	{
 		//ptr->DrawObject(mDC);
 		ptr->DrawObjectImage(mDC, hDC);
 
 		ptr = ptr->next;
 	}
+	Player->DrawObjectImage(mDC, hDC);
 }
 
 Object* ObjectManager::GetAllObjects()

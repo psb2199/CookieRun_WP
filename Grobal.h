@@ -27,7 +27,20 @@
 #define Bridge 10
 #define Energy 11
 #define Magnet 12
+#define Heart 20
+#define LifeBar1 14
+#define LifeBar2 14
+#define YellowJelly 15
+#define PinkJelly 16
+#define GeneralJelly 17
+#define BigJelly 18
 
+#define Coin_S 30
+#define Coin_G 31
+#define Coin_B 32
+
+#define Pause 40
+#define Coin_Ikon 41
 
 
 #define Bridge_width 120
@@ -43,3 +56,8 @@
 #define BigItem 8
 #define FastItem 9
 #define EnergyItem 10
+#define MagnetItem 11
+
+// effect
+#define FastEffect 13
+

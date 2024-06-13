@@ -98,6 +98,10 @@ void Object::DrawObjectImage(HDC mdc, HDC hDC)
 				image_raw = 5;
 				image_col = 6;
 				break;
+			case ANI_fast:
+				image_raw = 1;
+				image_col = 9;
+				break;
 			}
 
 			int animation_time = floor(MyH::fract(m_ElapseTime * animation_speed) * image_col);
@@ -151,6 +155,15 @@ void Object::DrawObjectImage(HDC mdc, HDC hDC)
 					ani_state = ANI_running;
 				}
 				break;
+			case ANI_fast:
+				if (animation_time % 2 == 0)
+					animation_time = 4;
+				else
+					animation_time = 5;
+
+				if (FastMode == false)ani_state = ANI_running;
+
+				break;
 			}
 
 			if (BigMode)
@@ -198,6 +211,75 @@ void Object::DrawObjectImage(HDC mdc, HDC hDC)
 				image.left, image.top, image.right - image.left, image.bottom - image.top, // x, y, 넓이, 높이,
 				0, 0, ObjectImage.GetWidth(), ObjectImage.GetHeight());
 		}
+		else if (type == Heart)
+		{
+			Graphics graphics(mdc);
+			Image img = (L".\\CookieRun_Resource\\icon_heartLife.png");
+
+			// 반투명 렌더링을 위해 이미지 속성 설정
+			ColorMatrix colorMatrix = {
+				1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+				0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+				0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+				0.0f, 0.0f, 0.0f, (float)255 / 255.0f, 0.0f,
+				0.0f, 0.0f, 0.0f, 0.0f, 1.0f
+			};
+
+			ImageAttributes imageAttributes;
+			imageAttributes.SetColorMatrix(&colorMatrix, ColorMatrixFlagsDefault, ColorAdjustTypeBitmap);
+
+			// 이미지 출력
+			graphics.DrawImage(
+				&img,
+				Rect(image.left, image.top, (image.right - image.left), (image.bottom - image.top)),
+				0, 0, ObjectImage.GetWidth(), ObjectImage.GetHeight(), UnitPixel, &imageAttributes);
+		}
+		else if (type == Pause)
+		{
+			Graphics graphics(mdc);
+			Image img = (L".\\CookieRun_Resource\\puase.png");
+
+			// 반투명 렌더링을 위해 이미지 속성 설정
+			ColorMatrix colorMatrix = {
+				1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+				0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+				0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+				0.0f, 0.0f, 0.0f, (float)255 / 255.0f, 0.0f,
+				0.0f, 0.0f, 0.0f, 0.0f, 1.0f
+			};
+
+			ImageAttributes imageAttributes;
+			imageAttributes.SetColorMatrix(&colorMatrix, ColorMatrixFlagsDefault, ColorAdjustTypeBitmap);
+
+			// 이미지 출력
+			graphics.DrawImage(
+				&img,
+				Rect(image.left, image.top, (image.right - image.left), (image.bottom - image.top)),
+				0, 0, ObjectImage.GetWidth(), ObjectImage.GetHeight(), UnitPixel, &imageAttributes);
+		}
+		else if (type == FastEffect)
+		{
+			Graphics graphics(mdc);
+			Image img = (L".\\CookieRun_Resource\\FastEffect.png");
+
+			// 반투명 렌더링을 위해 이미지 속성 설정
+			ColorMatrix colorMatrix = {
+				1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+				0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+				0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+				0.0f, 0.0f, 0.0f, (float)255 / 255.0f, 0.0f,
+				0.0f, 0.0f, 0.0f, 0.0f, 1.0f
+			};
+
+			ImageAttributes imageAttributes;
+			imageAttributes.SetColorMatrix(&colorMatrix, ColorMatrixFlagsDefault, ColorAdjustTypeBitmap);
+
+			// 이미지 출력
+			graphics.DrawImage(
+				&img,
+				Rect(image.left, image.top, (image.right - image.left), (image.bottom - image.top)),
+				0, 0, ObjectImage.GetWidth(), ObjectImage.GetHeight(), UnitPixel, &imageAttributes);
+		}
 		else
 		{
 			ObjectImage.Draw(mdc,
@@ -223,6 +305,7 @@ void Object::BeginEvents()
 	{
 		float m_size = 140;
 		original_y = pos_y;
+		//FastMode = true;
 		SetObjectVertexLocation(pos_x - m_size * size, pos_y - m_size * size, pos_x + m_size * size, pos_y + m_size * size);
 
 		SetCollisionBox(m_size / 2 * size, m_size / 2 * size, 0 * size, m_size * size);
@@ -258,17 +341,17 @@ void Object::BeginEvents()
 		SetObjectVertexLocation(pos_x, 0, pos_x + ratio1, 0 + ratio2);
 		SetCollisionBox(ObjectImage.GetWidth() / 3, ObjectImage.GetWidth() / 3, ObjectImage.GetHeight() / 3, ObjectImage.GetHeight() / 3);
 	}
-	else if (type == Jelly || type == Coin)
+	else if (type == PinkJelly || type == YellowJelly || type == BigJelly || type == GeneralJelly || type == Coin_S || type == Coin_B)
 	{
 		float ratio1 = ObjectImage.GetWidth() / 1.6;
 		float ratio2 = ObjectImage.GetHeight() / 1.6;
 		SetObjectVertexLocation(pos_x, pos_y, pos_x + ratio1, pos_y + ratio2);
 		SetCollisionBox(ObjectImage.GetWidth() / 4, ObjectImage.GetWidth() / 4, ObjectImage.GetHeight() / 4, ObjectImage.GetHeight() / 4);
 	}
-	else if (type == Goldcoin)
+	else if (type == Coin_G || type == Pause)
 	{
-		float ratio1 = ObjectImage.GetWidth() / 2.0;
-		float ratio2 = ObjectImage.GetHeight() / 2.0;
+		float ratio1 = ObjectImage.GetWidth() / 1.6;
+		float ratio2 = ObjectImage.GetHeight() / 1.6;
 		SetObjectVertexLocation(pos_x, pos_y, pos_x + ratio1, pos_y + ratio2);
 		SetCollisionBox(ObjectImage.GetWidth() / 4, ObjectImage.GetWidth() / 4, ObjectImage.GetHeight() / 4, ObjectImage.GetHeight() / 4);
 	}
@@ -276,6 +359,34 @@ void Object::BeginEvents()
 	{
 		float ratio1 = ObjectImage.GetWidth() / 2.1;
 		float ratio2 = ObjectImage.GetHeight() / 2.1;
+		SetObjectVertexLocation(pos_x, pos_y, pos_x + ratio1, pos_y + ratio2);
+		SetCollisionBox(ObjectImage.GetWidth() / 5, ObjectImage.GetWidth() / 5, ObjectImage.GetHeight() / 5, ObjectImage.GetHeight() / 5);
+	}
+	else if (type == FastEffect)
+	{
+		float ratio1 = ObjectImage.GetWidth() / 1.0;
+		float ratio2 = ObjectImage.GetHeight() / 1.0;
+		SetObjectVertexLocation(pos_x, pos_y, pos_x + ratio1, pos_y + ratio2);
+		SetCollisionBox(ObjectImage.GetWidth() / 5, ObjectImage.GetWidth() / 5, ObjectImage.GetHeight() / 5, ObjectImage.GetHeight() / 5);
+	}
+	else if (type == Heart)
+	{
+		float ratio1 = ObjectImage.GetWidth() / 1.0;
+		float ratio2 = ObjectImage.GetHeight() / 1.0;
+		SetObjectVertexLocation(pos_x, pos_y, pos_x + ratio1, pos_y + ratio2);
+		SetCollisionBox(ObjectImage.GetWidth() / 5, ObjectImage.GetWidth() / 5, ObjectImage.GetHeight() / 5, ObjectImage.GetHeight() / 5);
+	}
+	else if (type == LifeBar1 || type == Coin_Ikon)
+	{
+		float ratio1 = ObjectImage.GetWidth() / 1.8;
+		float ratio2 = ObjectImage.GetHeight() / 1.8;
+		SetObjectVertexLocation(pos_x, pos_y, pos_x + ratio1, pos_y + ratio2);
+		SetCollisionBox(ObjectImage.GetWidth() / 5, ObjectImage.GetWidth() / 5, ObjectImage.GetHeight() / 5, ObjectImage.GetHeight() / 5);
+	}
+	else if (type == LifeBar2)
+	{
+		float ratio1 = ObjectImage.GetWidth() / 1.8;
+		float ratio2 = ObjectImage.GetHeight() / 1.8;
 		SetObjectVertexLocation(pos_x, pos_y, pos_x + ratio1, pos_y + ratio2);
 		SetCollisionBox(ObjectImage.GetWidth() / 5, ObjectImage.GetWidth() / 5, ObjectImage.GetHeight() / 5, ObjectImage.GetHeight() / 5);
 	}
@@ -298,7 +409,10 @@ void Object::TickEvents()
 	}
 	if (BigMode == true) {
 		item_time += DELTA_TIME;
-
+		if (InvincibilityMode) {
+			InvincibilityMode = false;
+			add_speed = 1;
+		}
 		if (item_time > 2.2) {
 			BigMode = false;
 			item_time = 0;
@@ -306,10 +420,19 @@ void Object::TickEvents()
 	}
 	if (FastMode == true) {
 		item_time += DELTA_TIME;
+		InvincibilityMode = false;
 		add_speed = 2;
 		if (item_time > 2.2) {
 			FastMode = false;
 			add_speed = 1;
+			item_time = 0;
+		}
+	}
+
+	if (MagnetMode == true) {
+		item_time += DELTA_TIME;
+		if (item_time > 2.2) {
+			//MagnetMode = false;
 			item_time = 0;
 		}
 	}
@@ -329,35 +452,69 @@ void Object::TickEvents()
 		float speed = 8 * add_speed;
 		AddObjectMovement(-speed, 0);
 	}
-	else if (type == Jelly || type == Coin || type == Goldcoin)
+	else if (type == PinkJelly || type == YellowJelly || type == BigJelly || type == GeneralJelly || type == Coin_S || type == Coin_B || type == Coin_G)
 	{
 		float speed = 8 * add_speed;
 		AddObjectMovement(-speed, 0);
 
 	}
-	else if (type == Big || type == Fast || type == Energy)
+	else if (type == Big || type == Fast || type == Energy || type == Magnet)
 	{
 		float speed = 8 * add_speed;
 		AddObjectMovement(-speed, 0);
 
 	}
+	//else if (type == FastEffect)
+	//{
+	//	float speed = 16;
+	//	AddObjectMovement(-speed, 0);
+	//}
 }
 
 void Object::CollisionEvent(Object* byWhat)
 {
 	if (byWhat && byWhat->isPassed == false)
 	{
-		if (type == Cookie && byWhat->type == Jelly) {
+		// Jelly
+		if (type == Cookie && byWhat->type == GeneralJelly) {
 			byWhat->SetObjectLocation(-1000, 0);
+			score += 500;
 			byWhat->isPassed = true;
 		}
-		if (type == Cookie && byWhat->type == Coin || byWhat->type == Goldcoin) {
+		else if (type == Cookie && byWhat->type == PinkJelly) {
+			byWhat->SetObjectLocation(-1000, 0);
+			score += 1000;
+			byWhat->isPassed = true;
+		}
+		else if (type == Cookie && byWhat->type == YellowJelly) {
+			byWhat->SetObjectLocation(-1000, 0);
+			score += 3000;
+			byWhat->isPassed = true;
+		}
+		else if (type == Cookie && byWhat->type == BigJelly) {
+			byWhat->SetObjectLocation(-1000, 0);
+			score += 5000;
+			byWhat->isPassed = true;
+		}
+		// Coin
+		if (type == Cookie && byWhat->type == Coin_S) {
 			byWhat->SetObjectLocation(-1000, 0);
 			byWhat->isPassed = true;
+			coin += 10;
+		}
+		else if (type == Cookie && byWhat->type == Coin_G) {
+			byWhat->SetObjectLocation(-1000, 0);
+			byWhat->isPassed = true;
+			coin += 50;
+		}
+		else if (type == Cookie && byWhat->type == Coin_B) {
+			byWhat->SetObjectLocation(-1000, 0);
+			byWhat->isPassed = true;
+			coin += 50;
 		}
 
 		// 장애물 충돌
-		if (type == Cookie && BigMode == true && (byWhat->type == Obstacle_J || byWhat->type == Obstacle_S)) {
+		if (type == Cookie && (BigMode == true || FastMode == true) && (byWhat->type == Obstacle_J || byWhat->type == Obstacle_S)) {
 			byWhat->SetObjectLocation(-10000, 0);
 			byWhat->isPassed = true;
 		}
@@ -380,6 +537,7 @@ void Object::CollisionEvent(Object* byWhat)
 			byWhat->SetObjectLocation(-10000, 0);
 			byWhat->isPassed = true;
 			FastMode = true;
+			ani_state = ANI_fast;
 		}
 		if (type == Cookie && byWhat->type == Magnet) {
 			byWhat->SetObjectLocation(-10000, 0);

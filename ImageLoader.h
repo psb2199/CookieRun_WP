@@ -28,6 +28,13 @@ public:
 	CImage I_BigCoin;
 	CImage I_Bigitem;
 	CImage I_Fastitem;
+	CImage I_Magnetitem;
 	CImage I_Energyitem;
+	CImage I_FastEffect;
+	CImage I_Heart;
+	CImage I_LifeBar1;
+	CImage I_LifeBar2;
+	CImage I_Pause;
+
 };
 
