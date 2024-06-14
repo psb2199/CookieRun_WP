@@ -143,7 +143,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		break;
 
 	case WM_KEYDOWN:
-		KeyDownEvents(hWnd, wParam);
+		if(!KEY.down)KeyDownEvents(hWnd, wParam);
 		break;
 
 	case WM_KEYUP:

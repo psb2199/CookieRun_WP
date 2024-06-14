@@ -78,9 +78,12 @@ public:
 	RectRange image; //이미지의 (x1, y1) , (x2, y2)의 좌표
 	
 	RectRange CollisionBox;
+	RectRange CollisionBox_Value;
 
 	int ani_state;
 	int count_jump;
+
+	
 
 private:
 	RectRange Del_CollisionBox;

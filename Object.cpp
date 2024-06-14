@@ -69,7 +69,7 @@ void Object::DrawObjectImage(HDC mdc, HDC hDC)
 			int sprite_size = 319; // 프레임 하나의 사이즈
 			int line_size = 3; // 프레임과 프레임 사이의 선 사이즈
 
-			float animation_speed = 7;
+			float animation_speed = 5;
 
 			image_raw = 1;
 			image_col = 4;
@@ -185,27 +185,12 @@ void Object::DrawObjectImage(HDC mdc, HDC hDC)
 			}
 			else if (InvincibilityMode)
 			{
-				//Graphics graphics(mdc);
-				//Image img(L".\\CookieRun_Resource\\cookie\\Angel Cookie.png");
-
-				//// 반투명 렌더링을 위해 이미지 속성 설정
-				//ColorMatrix colorMatrix = {
-				//	1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-				//	0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
-				//	0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-				//	0.0f, 0.0f, 0.0f, (float)100 / 255.0f, 0.0f,
-				//	0.0f, 0.0f, 0.0f, 0.0f, 1.0f
-				//};
-
-				//ImageAttributes imageAttributes;
-				//imageAttributes.SetColorMatrix(&colorMatrix, ColorMatrixFlagsDefault, ColorAdjustTypeBitmap);
-
-				//// 이미지 출력
-				//graphics.DrawImage(
-				//	&img,
-				//	Rect(image.left, image.top, (image.right - image.left), (image.bottom - image.top)),
-				//	line_size * animation_time + animation_time * sprite_size + 2, line_size * (image_raw + 1) + sprite_size * image_raw,
-				//	sprite_size, sprite_size, UnitPixel, &imageAttributes);
+				if (animation_time % 2 == 0)
+				{
+					ObjectImage.Draw(mdc,
+						image.left, image.top, image.right - image.left, image.bottom - image.top, // x, y, 넓이, 높이,
+						line_size* animation_time + animation_time * sprite_size + 2, line_size* (image_raw + 1) + sprite_size * image_raw, sprite_size, sprite_size); // 이미지 내의 좌표
+				}
 			}
 
 
@@ -331,7 +316,12 @@ void Object::BeginEvents()
 		//FastMode = true;
 		SetObjectVertexLocation(pos_x - m_size * size, pos_y - m_size * size, pos_x + m_size * size, pos_y + m_size * size);
 
-		SetCollisionBox(m_size / 4 * size, m_size / 4 * size, 0 * size, m_size / 1.5 * size);
+		CollisionBox_Value.left = m_size / 4 * size;
+		CollisionBox_Value.right = m_size / 4 * size;
+		CollisionBox_Value.top = 0 * size;
+		CollisionBox_Value.bottom = m_size / 1.5 * size;
+		SetCollisionBox(CollisionBox_Value.left, CollisionBox_Value.right, CollisionBox_Value.top, CollisionBox_Value.bottom);
+	
 
 		ani_state = ANI_running;
 		MagnetMode = true;
@@ -420,6 +410,19 @@ void Object::TickEvents()
 {
 	// 주기적으로 계속 발생하는 이벤트(주기는 0.008초) 
 	UpdateCollisionBox();
+
+	if (type == Cookie)
+	{
+		if (ani_state == ANI_sliding)
+		{
+			int Del_TopCollision = 20;
+			SetCollisionBox(CollisionBox_Value.left, CollisionBox_Value.right, CollisionBox_Value.top - Del_TopCollision, CollisionBox_Value.bottom);
+		}
+		else
+		{
+			SetCollisionBox(CollisionBox_Value.left, CollisionBox_Value.right, CollisionBox_Value.top, CollisionBox_Value.bottom);
+		}
+	}
 
 	if (InvincibilityMode == true) {
 		item_time += DELTA_TIME;
