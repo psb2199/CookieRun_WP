@@ -12,6 +12,7 @@
 #define ANI_sliding_up 5
 #define ANI_collision 6
 #define ANI_fast 7
+#define ANI_die 8
 
 // type 
 #define AngelCookie 100

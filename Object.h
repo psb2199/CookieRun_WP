@@ -68,6 +68,8 @@ public:
 	bool InvincibilityMode{ false };
 	bool isPassed{ false };
 
+	bool PlayMode{ true };
+
 	Object* next;
 	Object* prev;
 

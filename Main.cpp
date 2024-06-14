@@ -24,7 +24,6 @@ void MagnetMode(Object* obj);
 void KeyDownEvents(HWND hWnd, WPARAM wParam);
 void KeyUpEvents(HWND hWnd, WPARAM wParam);
 
-bool PlayMode{ true };
 int CookieType{ AngelCookie };
 
 struct KeyEventFlag {
@@ -137,6 +136,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	case WM_CREATE:
 		Initialize();
 		SetTimer(hWnd, 1, DELTA_TIME * 1000, NULL);
+		SetTimer(hWnd, 2, 100, NULL);
 		break;
 
 	case WM_CHAR:
@@ -194,11 +194,19 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 				 break;
 
 	case WM_TIMER:
+		switch (wParam) {
+		case 1:
 
-		if (PlayMode) {
-			GameTime += DELTA_TIME;
-			TickEvent();
-			InvalidateRect(hWnd, NULL, false);
+			if (Player->PlayMode) {
+				GameTime += DELTA_TIME;
+				TickEvent();
+				InvalidateRect(hWnd, NULL, false);
+			}
+			break;
+		case 2:
+			if (Player->hp > 0 && Player->InvincibilityMode == false)
+				Player->hp -= 0.1;
+			break;
 		}
 
 		MakeEffect();
@@ -266,7 +274,6 @@ void TickEvent() {
 	//}
 
 	Object* ptr = ObjectMgr.GetAllObjects();
-	Player->hp -= 0.1;
 
 	while (ptr != nullptr)
 	{
@@ -568,7 +575,7 @@ void KeyDownEvents(HWND hWnd, WPARAM wParam) {
 
 	case 'P':
 	case 'p':
-		PlayMode = !PlayMode;
+		Player->PlayMode = !Player->PlayMode;
 		break;
 
 	case 'Q':

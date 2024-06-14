@@ -97,12 +97,24 @@ void ObjectManager::DrawAll(HDC mDC, HDC hDC)
 	while (ptr != nullptr)
 	{
 		//ptr->DrawObject(mDC);
-		if (ptr->type == LifeBar2)
+		//if (ptr->type == LifeBar2 && ptr->ObjectImage.GetWidth() - (100 - Player->hp) * 50 < 1) Player->PlayMode = false;
+		if (ptr->type == LifeBar2 &&  Player->hp > 100)
 		{
 			ptr->ObjectImage.Draw(mDC,
-				ptr->image.left, ptr->image.top, ptr->image.right - ptr->image.left - (100 - Player->hp) * 0.7, ptr->image.bottom - ptr->image.top, // x, y, ³ÐÀÌ, ³ôÀÌ,
-				0, 0, ptr->ObjectImage.GetWidth() - (100 - Player->hp), ptr->ObjectImage.GetHeight());
+				ptr->image.left, ptr->image.top, ptr->image.right - ptr->image.left, ptr->image.bottom - ptr->image.top, // x, y, ³ÐÀÌ, ³ôÀÌ,
+				0, 0, ptr->ObjectImage.GetWidth(), ptr->ObjectImage.GetHeight());
 
+		}
+		else if (ptr->type == LifeBar2 &&  (100 - Player->hp) > 0 && Player->hp > 0)
+		{
+			ptr->ObjectImage.Draw(mDC,
+				ptr->image.left, ptr->image.top, ptr->image.right - ptr->image.left - (100 - Player->hp) * 4, ptr->image.bottom - ptr->image.top, // x, y, ³ÐÀÌ, ³ôÀÌ,
+				0, 0, ptr->ObjectImage.GetWidth() - (100 - Player->hp)*6 , ptr->ObjectImage.GetHeight());
+
+		}
+		if (ptr->type == LifeBar2 && ptr->image.right - ptr->image.left - (100 - Player->hp) * 4<10) {
+			//Player->PlayMode = false;
+			Player->ani_state = ANI_die;
 		}
 		else
 			ptr->DrawObjectImage(mDC, hDC);

@@ -103,6 +103,10 @@ void Object::DrawObjectImage(HDC mdc, HDC hDC)
 				image_raw = 1;
 				image_col = 9;
 				break;
+			case ANI_die:
+				image_raw = 4;
+				image_col = 5;
+				break;
 			}
 
 			int animation_time = floor(MyH::fract(m_ElapseTime * animation_speed) * image_col);
@@ -164,6 +168,12 @@ void Object::DrawObjectImage(HDC mdc, HDC hDC)
 
 				if (FastMode == false)ani_state = ANI_running;
 
+				break;
+			case ANI_die:
+				if (animation_time== 4)
+				{
+					PlayMode = false;
+				}
 				break;
 			}
 
@@ -396,7 +406,7 @@ void Object::BeginEvents()
 		SetObjectVertexLocation(pos_x, pos_y, pos_x + ratio1, pos_y + ratio2);
 		SetCollisionBox(ObjectImage.GetWidth() / 5, ObjectImage.GetWidth() / 5, ObjectImage.GetHeight() / 5, ObjectImage.GetHeight() / 5);
 	}
-	else if(type == LifeBar2)
+	else if (type == LifeBar2)
 	{
 		float ratio1 = ObjectImage.GetWidth() / 1.8;
 		float ratio2 = ObjectImage.GetHeight() / 1.8;
@@ -535,7 +545,7 @@ void Object::CollisionEvent(Object* byWhat)
 			&& (byWhat->type == Obstacle_J || byWhat->type == Obstacle_S))
 		{
 			byWhat->isPassed = true;
-			hp -= 50;
+			hp -= 10;
 			InvincibilityMode = true;
 			m_ElapseTime = 0;
 			ani_state = ANI_collision;
@@ -560,7 +570,7 @@ void Object::CollisionEvent(Object* byWhat)
 		}
 		if (type == Cookie && byWhat->type == Energy) {
 			byWhat->SetObjectLocation(-10000, 0);
-			hp += 20;
+			hp += 5;
 			byWhat->isPassed = true;
 		}
 
