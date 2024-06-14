@@ -94,14 +94,23 @@ void ObjectManager::DeleteAll()
 void ObjectManager::DrawAll(HDC mDC, HDC hDC)
 {
 	Object* ptr = Head;
-	while (ptr != nullptr )
+	while (ptr != nullptr)
 	{
 		//ptr->DrawObject(mDC);
-		ptr->DrawObjectImage(mDC, hDC);
+		if (ptr->type == LifeBar2)
+		{
+			ptr->ObjectImage.Draw(mDC,
+				ptr->image.left, ptr->image.top, ptr->image.right - ptr->image.left - (100 - Player->hp) * 0.7, ptr->image.bottom - ptr->image.top, // x, y, ³ÐÀÌ, ³ôÀÌ,
+				0, 0, ptr->ObjectImage.GetWidth() - (100 - Player->hp), ptr->ObjectImage.GetHeight());
+
+		}
+		else
+			ptr->DrawObjectImage(mDC, hDC);
 
 		ptr = ptr->next;
 	}
 	Player->DrawObjectImage(mDC, hDC);
+
 }
 
 Object* ObjectManager::GetAllObjects()

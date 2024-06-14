@@ -25,6 +25,7 @@ void KeyDownEvents(HWND hWnd, WPARAM wParam);
 void KeyUpEvents(HWND hWnd, WPARAM wParam);
 
 bool PlayMode{ true };
+int CookieType{ AngelCookie };
 
 struct KeyEventFlag {
 	bool up{ false };
@@ -70,6 +71,7 @@ void MakeObstacles();
 void MakeCoin();
 void MakeJelly();
 void MakeEffect();
+void TextOutScoreandCoin(HDC mdc);
 void MakeGrid(HDC mdc);
 RECT Grid[28][28];
 int jellytype{ MagnetItem };
@@ -149,7 +151,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		break;
 
 	case WM_LBUTTONDOWN:
-		MouseLeftDownEvent(lParam);
+		//MouseLeftDownEvent(lParam);
 		InvalidateRect(hWnd, NULL, false);
 		break;
 	case WM_LBUTTONUP:
@@ -177,17 +179,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		DrawObject(mDC, hDC);
 		//MakeGrid(mDC);
 
-		AddFontResource(TEXT("CookieRun Bold.ttf"));
-		HFONT currentFont = CreateFont(30, 0, 0, 0, 0, 0, 0, 0, HANGEUL_CHARSET, 0, 0, 0, VARIABLE_PITCH || FF_ROMAN, TEXT("CookieRun Bold"));
-		HFONT oldFont = (HFONT)SelectObject(mDC, currentFont);
-		SetBkMode(mDC, TRANSPARENT);
-		SetTextColor(mDC, RGB(255, 255, 255));
-		wsprintf(buffer1, L"score  %d", Player->score);
-		TextOut(mDC, 700, 30, buffer1, lstrlen(buffer1));
-		wsprintf(buffer2, L"%d", Player->coin);
-		TextOut(mDC, 560, 30, buffer2, lstrlen(buffer2));
-		SelectObject(mDC, oldFont);
-		DeleteObject(currentFont);
+		TextOutScoreandCoin(mDC);
 
 
 		BitBlt(hDC, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, mDC, 0, 0, SRCCOPY);
@@ -263,6 +255,7 @@ void MakeGrid(HDC mdc) {
 
 void DrawObject(HDC mdc, HDC hDC) {
 	ObjectMgr.DrawAll(mdc, hDC);
+
 }
 
 void TickEvent() {
@@ -273,6 +266,7 @@ void TickEvent() {
 	//}
 
 	Object* ptr = ObjectMgr.GetAllObjects();
+	Player->hp -= 0.1;
 
 	while (ptr != nullptr)
 	{
@@ -461,6 +455,21 @@ void MakeEffect()
 {
 }
 
+void TextOutScoreandCoin(HDC mDC)
+{
+	AddFontResource(TEXT("CookieRun Bold.ttf"));
+	HFONT currentFont = CreateFont(30, 0, 0, 0, 0, 0, 0, 0, HANGEUL_CHARSET, 0, 0, 0, VARIABLE_PITCH || FF_ROMAN, TEXT("CookieRun Bold"));
+	HFONT oldFont = (HFONT)SelectObject(mDC, currentFont);
+	SetBkMode(mDC, TRANSPARENT);
+	SetTextColor(mDC, RGB(255, 255, 255));
+	wsprintf(buffer1, L"score  %d", Player->score);
+	TextOut(mDC, 700, 30, buffer1, lstrlen(buffer1));
+	wsprintf(buffer2, L"%d", Player->coin);
+	TextOut(mDC, 560, 30, buffer2, lstrlen(buffer2));
+	SelectObject(mDC, oldFont);
+	DeleteObject(currentFont);
+}
+
 void MakeBackGround1()
 {
 	float h = ImageL.I_BackGround.GetHeight();
@@ -544,11 +553,11 @@ void KeyDownEvents(HWND hWnd, WPARAM wParam) {
 		KEY.KeySubtract = true;
 		break;
 	case VK_SPACE:
-		/*	KEY.KeySpace = true;
-			Player->m_ElapseTime = 0;
-			Player->isJumping = true;
-			Player->ani_state = ANI_jumping;
-			Player->count_jump += 1;*/
+		KEY.KeySpace = true;
+		Player->m_ElapseTime = 0;
+		Player->isJumping = true;
+		Player->ani_state = ANI_jumping;
+		Player->count_jump += 1;
 		break;
 
 	case 'J':

@@ -49,7 +49,7 @@ public:
 
 	int score{ 0 };
 	int coin{ 0 };
-	int hp{ 100 };
+	float hp{ 100 };
 
 	float m_ElapseTime;
 	float vel_x;

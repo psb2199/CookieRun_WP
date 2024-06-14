@@ -14,6 +14,9 @@
 #define ANI_fast 7
 
 // type 
+#define AngelCookie 100
+#define BoarderCookie 101
+#define ZombieCookie 102
 #define Cookie 1
 #define Background 2
 #define Background2 3
@@ -29,7 +32,7 @@
 #define Magnet 12
 #define Heart 20
 #define LifeBar1 14
-#define LifeBar2 14
+#define LifeBar2 80
 #define YellowJelly 15
 #define PinkJelly 16
 #define GeneralJelly 17

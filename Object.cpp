@@ -26,6 +26,7 @@ void ShutdownGDIPlus(ULONG_PTR gdiplusToken)
 #include "Grobal.h"
 int add_speed = 1;
 
+
 Object::Object()
 {
 
@@ -196,6 +197,8 @@ void Object::DrawObjectImage(HDC mdc, HDC hDC)
 					line_size * animation_time + animation_time * sprite_size + 2, line_size * (image_raw + 1) + sprite_size * image_raw,
 					sprite_size, sprite_size, UnitPixel, &imageAttributes);
 			}
+
+
 			else
 			{
 				ObjectImage.Draw(mdc,
@@ -280,6 +283,15 @@ void Object::DrawObjectImage(HDC mdc, HDC hDC)
 				Rect(image.left, image.top, (image.right - image.left), (image.bottom - image.top)),
 				0, 0, ObjectImage.GetWidth(), ObjectImage.GetHeight(), UnitPixel, &imageAttributes);
 		}
+		else if (type == LifeBar1)
+		{
+			ObjectImage.Draw(mdc,
+				image.left, image.top, image.right - image.left, image.bottom - image.top, // x, y, ³ĞÀÌ, ³ôÀÌ,
+				0, 0, ObjectImage.GetWidth(), ObjectImage.GetHeight());
+		}
+		else if (type == LifeBar2)
+		{
+		}
 		else
 		{
 			ObjectImage.Draw(mdc,
@@ -305,6 +317,7 @@ void Object::BeginEvents()
 	{
 		float m_size = 140;
 		original_y = pos_y;
+		hp = 100;
 		//FastMode = true;
 		SetObjectVertexLocation(pos_x - m_size * size, pos_y - m_size * size, pos_x + m_size * size, pos_y + m_size * size);
 
@@ -383,7 +396,7 @@ void Object::BeginEvents()
 		SetObjectVertexLocation(pos_x, pos_y, pos_x + ratio1, pos_y + ratio2);
 		SetCollisionBox(ObjectImage.GetWidth() / 5, ObjectImage.GetWidth() / 5, ObjectImage.GetHeight() / 5, ObjectImage.GetHeight() / 5);
 	}
-	else if (type == LifeBar2)
+	else if(type == LifeBar2)
 	{
 		float ratio1 = ObjectImage.GetWidth() / 1.8;
 		float ratio2 = ObjectImage.GetHeight() / 1.8;
@@ -522,6 +535,7 @@ void Object::CollisionEvent(Object* byWhat)
 			&& (byWhat->type == Obstacle_J || byWhat->type == Obstacle_S))
 		{
 			byWhat->isPassed = true;
+			hp -= 50;
 			InvincibilityMode = true;
 			m_ElapseTime = 0;
 			ani_state = ANI_collision;
@@ -546,6 +560,7 @@ void Object::CollisionEvent(Object* byWhat)
 		}
 		if (type == Cookie && byWhat->type == Energy) {
 			byWhat->SetObjectLocation(-10000, 0);
+			hp += 20;
 			byWhat->isPassed = true;
 		}
 
