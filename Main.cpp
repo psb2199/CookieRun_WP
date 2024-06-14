@@ -280,7 +280,7 @@ void TickEvent() {
 		if (ptr->pos_x > -1000)
 		{
 			ptr->TickEvents();
-			CheckCollision(ptr);
+			if(ptr->pos_x > 0 && ptr->pos_x<WINDOW_WIDTH) CheckCollision(ptr);
 			if (Player->MagnetMode == true) MagnetMode(ptr);
 			ptr->SetDebugMode(DeBugMode);
 			ptr->m_ElapseTime += DELTA_TIME;
@@ -295,8 +295,8 @@ void TickEvent() {
 void PlayerHandler()
 {
 	float speed{ 10.0 };
-	if (KEY.left) Player->AddObjectMovement(-speed, 0);
-	if (KEY.right) Player->AddObjectMovement(speed, 0);
+	//if (KEY.left) Player->AddObjectMovement(-speed, 0);
+	//if (KEY.right) Player->AddObjectMovement(speed, 0);
 	if (KEY.keyJ) Player->AddObjectMovement(0, -speed);
 	if (KEY.down)
 	{

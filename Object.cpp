@@ -80,7 +80,7 @@ void Object::DrawObjectImage(HDC mdc, HDC hDC)
 				image_col = 4;
 				break;
 			case ANI_jumping:
-				image_raw = 5;
+				image_raw = 1;
 				image_col = 4;
 				break;
 			case ANI_double_jumping:
@@ -185,27 +185,27 @@ void Object::DrawObjectImage(HDC mdc, HDC hDC)
 			}
 			else if (InvincibilityMode)
 			{
-				Graphics graphics(mdc);
-				Image img(L".\\CookieRun_Resource\\cookie\\Angel Cookie.png");
+				//Graphics graphics(mdc);
+				//Image img(L".\\CookieRun_Resource\\cookie\\Angel Cookie.png");
 
-				// 반투명 렌더링을 위해 이미지 속성 설정
-				ColorMatrix colorMatrix = {
-					1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-					0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
-					0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-					0.0f, 0.0f, 0.0f, (float)100 / 255.0f, 0.0f,
-					0.0f, 0.0f, 0.0f, 0.0f, 1.0f
-				};
+				//// 반투명 렌더링을 위해 이미지 속성 설정
+				//ColorMatrix colorMatrix = {
+				//	1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+				//	0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+				//	0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+				//	0.0f, 0.0f, 0.0f, (float)100 / 255.0f, 0.0f,
+				//	0.0f, 0.0f, 0.0f, 0.0f, 1.0f
+				//};
 
-				ImageAttributes imageAttributes;
-				imageAttributes.SetColorMatrix(&colorMatrix, ColorMatrixFlagsDefault, ColorAdjustTypeBitmap);
+				//ImageAttributes imageAttributes;
+				//imageAttributes.SetColorMatrix(&colorMatrix, ColorMatrixFlagsDefault, ColorAdjustTypeBitmap);
 
-				// 이미지 출력
-				graphics.DrawImage(
-					&img,
-					Rect(image.left, image.top, (image.right - image.left), (image.bottom - image.top)),
-					line_size * animation_time + animation_time * sprite_size + 2, line_size * (image_raw + 1) + sprite_size * image_raw,
-					sprite_size, sprite_size, UnitPixel, &imageAttributes);
+				//// 이미지 출력
+				//graphics.DrawImage(
+				//	&img,
+				//	Rect(image.left, image.top, (image.right - image.left), (image.bottom - image.top)),
+				//	line_size * animation_time + animation_time * sprite_size + 2, line_size * (image_raw + 1) + sprite_size * image_raw,
+				//	sprite_size, sprite_size, UnitPixel, &imageAttributes);
 			}
 
 
@@ -331,7 +331,7 @@ void Object::BeginEvents()
 		//FastMode = true;
 		SetObjectVertexLocation(pos_x - m_size * size, pos_y - m_size * size, pos_x + m_size * size, pos_y + m_size * size);
 
-		SetCollisionBox(m_size / 2 * size, m_size / 2 * size, 0 * size, m_size * size);
+		SetCollisionBox(m_size / 4 * size, m_size / 4 * size, 0 * size, m_size / 1.5 * size);
 
 		ani_state = ANI_running;
 		MagnetMode = true;
@@ -665,11 +665,23 @@ void Object::SetCollisionBox(float l, float r, float t, float b)
 
 void Object::DoJump()
 {
+	float left_d = pos_x - image.left;
+	float right_d = pos_x - image.right;
+	float top_d = pos_y - image.top;
+	float bottom_d = pos_y - image.bottom;
+
 	int jump_height = 1000;
 	int falling_time = 1;
 	int speed = 5;
 	float jumping_time = m_ElapseTime * speed;
 	pos_y = jump_height * jumping_time * (jumping_time - falling_time) + original_y;
+
+
+	image.left = pos_x - left_d;
+	image.right = pos_x - right_d;
+	image.top = pos_y - top_d;
+	image.bottom = pos_y - bottom_d;
+
 	if (jumping_time >= falling_time) {
 		jumping_time = 0;
 		isJumping = false;

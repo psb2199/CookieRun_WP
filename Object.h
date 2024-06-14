@@ -7,6 +7,8 @@
 #include "Draw.h"
 
 
+using namespace Gdiplus;
+
 struct RectRange 
 {
 	float left;
