@@ -98,31 +98,127 @@ void ObjectManager::DrawAll(HDC mDC, HDC hDC)
 	{
 		//ptr->DrawObject(mDC);
 		//if (ptr->type == LifeBar2 && ptr->ObjectImage.GetWidth() - (100 - Player->hp) * 50 < 1) Player->PlayMode = false;
-		if (ptr->type == LifeBar2 &&  Player->hp > 100)
+		if (Player->StartBackGround == true && Player->PlayMode == false && ptr->type == BackGround_Start)
 		{
 			ptr->ObjectImage.Draw(mDC,
 				ptr->image.left, ptr->image.top, ptr->image.right - ptr->image.left, ptr->image.bottom - ptr->image.top, // x, y, ³ÐÀÌ, ³ôÀÌ,
 				0, 0, ptr->ObjectImage.GetWidth(), ptr->ObjectImage.GetHeight());
-
 		}
-		else if (ptr->type == LifeBar2 &&  (100 - Player->hp) > 0 && Player->hp > 0)
+		else if (Player->StartBackGround == true && Player->PlayMode == false && Player->ClickStart == false && (ptr->type == GameStart_no))
 		{
 			ptr->ObjectImage.Draw(mDC,
-				ptr->image.left, ptr->image.top, ptr->image.right - ptr->image.left - (100 - Player->hp) * 4, ptr->image.bottom - ptr->image.top, // x, y, ³ÐÀÌ, ³ôÀÌ,
-				0, 0, ptr->ObjectImage.GetWidth() - (100 - Player->hp)*6 , ptr->ObjectImage.GetHeight());
-
+				ptr->image.left, ptr->image.top, ptr->image.right - ptr->image.left, ptr->image.bottom - ptr->image.top, // x, y, ³ÐÀÌ, ³ôÀÌ,
+				0, 0, ptr->ObjectImage.GetWidth(), ptr->ObjectImage.GetHeight());
 		}
-		if (ptr->type == LifeBar2 && ptr->image.right - ptr->image.left - (100 - Player->hp) * 4<10) {
-			//Player->PlayMode = false;
-			Player->ani_state = ANI_die;
+		else if (Player->StartBackGround == true && Player->PlayMode == false && Player->ClickStart == true && (ptr->type == GameStart_dim))
+		{
+			ptr->ObjectImage.Draw(mDC,
+				ptr->image.left, ptr->image.top, ptr->image.right - ptr->image.left, ptr->image.bottom - ptr->image.top, // x, y, ³ÐÀÌ, ³ôÀÌ,
+				0, 0, ptr->ObjectImage.GetWidth(), ptr->ObjectImage.GetHeight());
 		}
-		else
-			ptr->DrawObjectImage(mDC, hDC);
+		/*	else if (Player->StartBackGround == false&& Player->GameEnd == true )
+			{
+			}*/
+		else if (Player->StartBackGround == false)
+		{
+			if (ptr->type == ScoreBoard && Player->GameEnd == true)
+			{
+				ptr->ObjectImage.Draw(mDC,
+					ptr->image.left, ptr->image.top, ptr->image.right - ptr->image.left, ptr->image.bottom - ptr->image.top, // x, y, ³ÐÀÌ, ³ôÀÌ,
+					0, 0, ptr->ObjectImage.GetWidth(), ptr->ObjectImage.GetHeight());
+			}
 
+			if (ptr->type == Playagain_dim&&Player->ClickAgain==true && Player->GameEnd == true)
+			{
+				ptr->ObjectImage.Draw(mDC,
+					ptr->image.left, ptr->image.top, ptr->image.right - ptr->image.left, ptr->image.bottom - ptr->image.top, // x, y, ³ÐÀÌ, ³ôÀÌ,
+					0, 0, ptr->ObjectImage.GetWidth(), ptr->ObjectImage.GetHeight());
+			}
+			else if (ptr->type == Playagain_no && Player->ClickAgain == false && Player->GameEnd == true)
+			{
+				ptr->ObjectImage.Draw(mDC,
+					ptr->image.left, ptr->image.top, ptr->image.right - ptr->image.left, ptr->image.bottom - ptr->image.top, // x, y, ³ÐÀÌ, ³ôÀÌ,
+					0, 0, ptr->ObjectImage.GetWidth(), ptr->ObjectImage.GetHeight());
+			}
+
+			if (ptr->type == EndGame_dim && Player->ClickEnd == true && Player->GameEnd == true)
+			{
+				ptr->ObjectImage.Draw(mDC,
+					ptr->image.left, ptr->image.top, ptr->image.right - ptr->image.left, ptr->image.bottom - ptr->image.top, // x, y, ³ÐÀÌ, ³ôÀÌ,
+					0, 0, ptr->ObjectImage.GetWidth(), ptr->ObjectImage.GetHeight());
+			}
+			else if (ptr->type == EndGame_no && Player->ClickEnd == false && Player->GameEnd == true)
+			{
+				ptr->ObjectImage.Draw(mDC,
+					ptr->image.left, ptr->image.top, ptr->image.right - ptr->image.left, ptr->image.bottom - ptr->image.top, // x, y, ³ÐÀÌ, ³ôÀÌ,
+					0, 0, ptr->ObjectImage.GetWidth(), ptr->ObjectImage.GetHeight());
+			}
+
+			if (ptr->type == Background_Last)
+			{
+				float h = ptr->ObjectImage.GetHeight();
+				float ratio = WINDOW_HEIGHT / h;
+
+				if (ptr->pos_x + WINDOW_WIDTH - 70 > WINDOW_WIDTH)
+				{
+				}
+				else
+				{
+					Player->EndObjectMove = false;
+				}
+			}
+			if (Player->PlayMode == false && Player->ClickExit == true && (ptr->type == Exit_dim))
+			{
+				ptr->ObjectImage.Draw(mDC,
+					ptr->image.left, ptr->image.top, ptr->image.right - ptr->image.left, ptr->image.bottom - ptr->image.top, // x, y, ³ÐÀÌ, ³ôÀÌ,
+					0, 0, ptr->ObjectImage.GetWidth(), ptr->ObjectImage.GetHeight());
+			}
+			else if (Player->PlayMode == false && Player->ClickExit == false && (ptr->type == Exit_no))
+			{
+				ptr->ObjectImage.Draw(mDC,
+					ptr->image.left, ptr->image.top, ptr->image.right - ptr->image.left, ptr->image.bottom - ptr->image.top, // x, y, ³ÐÀÌ, ³ôÀÌ,
+					0, 0, ptr->ObjectImage.GetWidth(), ptr->ObjectImage.GetHeight());
+			}
+
+			if (Player->PlayMode == false && Player->ClickContinue == true && (ptr->type == Continue_dim))
+			{
+				ptr->ObjectImage.Draw(mDC,
+					ptr->image.left, ptr->image.top, ptr->image.right - ptr->image.left, ptr->image.bottom - ptr->image.top, // x, y, ³ÐÀÌ, ³ôÀÌ,
+					0, 0, ptr->ObjectImage.GetWidth(), ptr->ObjectImage.GetHeight());
+			}
+			else if (Player->PlayMode == false && Player->ClickContinue == false && (ptr->type == Continue_no))
+			{
+				ptr->ObjectImage.Draw(mDC,
+					ptr->image.left, ptr->image.top, ptr->image.right - ptr->image.left, ptr->image.bottom - ptr->image.top, // x, y, ³ÐÀÌ, ³ôÀÌ,
+					0, 0, ptr->ObjectImage.GetWidth(), ptr->ObjectImage.GetHeight());
+			}
+
+
+			if (ptr->type == LifeBar2 && Player->hp > 100)
+			{
+				ptr->ObjectImage.Draw(mDC,
+					ptr->image.left, ptr->image.top, ptr->image.right - ptr->image.left, ptr->image.bottom - ptr->image.top, // x, y, ³ÐÀÌ, ³ôÀÌ,
+					0, 0, ptr->ObjectImage.GetWidth(), ptr->ObjectImage.GetHeight());
+
+			}
+			else if (ptr->type == LifeBar2 && (100 - Player->hp) > 0 && Player->hp > 0)
+			{
+				ptr->ObjectImage.Draw(mDC,
+					ptr->image.left, ptr->image.top, ptr->image.right - ptr->image.left - (100 - Player->hp) * 4, ptr->image.bottom - ptr->image.top, // x, y, ³ÐÀÌ, ³ôÀÌ,
+					0, 0, ptr->ObjectImage.GetWidth() - (100 - Player->hp) * 6, ptr->ObjectImage.GetHeight());
+
+			}
+			if (ptr->type == LifeBar2 && ptr->image.right - ptr->image.left - (100 - Player->hp) * 4 < 30) {
+				//Player->PlayMode = false;
+				Player->ani_state = ANI_die;
+			}
+			else
+				ptr->DrawObjectImage(mDC, hDC);
+		}
 		ptr = ptr->next;
-	}
-	Player->DrawObjectImage(mDC, hDC);
 
+	}
+	if (Player->StartBackGround == false)Player->DrawObjectImage(mDC, hDC);
 }
 
 Object* ObjectManager::GetAllObjects()

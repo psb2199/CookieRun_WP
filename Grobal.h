@@ -15,10 +15,12 @@
 #define ANI_die 8
 
 // type 
+#define BackGround_Start 1000
 #define AngelCookie 100
 #define BoarderCookie 101
 #define ZombieCookie 102
 #define Cookie 1
+#define Background_Last 0
 #define Background 2
 #define Background2 3
 #define Obstacle_J 4
@@ -45,7 +47,17 @@
 
 #define Pause 40
 #define Coin_Ikon 41
-
+#define Continue_no 42
+#define Continue_dim 43
+#define Exit_no 44
+#define Exit_dim 45
+#define GameStart_no 46
+#define GameStart_dim 47
+#define ScoreBoard 48
+#define Playagain_no 49
+#define Playagain_dim 51
+#define EndGame_no 52
+#define EndGame_dim 53
 
 #define Bridge_width 120
 

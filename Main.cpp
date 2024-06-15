@@ -4,6 +4,9 @@
 #include <string>
 #include <fstream>
 #include "Grobal.h"
+#include <windows.h>
+#include <mmsystem.h>
+#pragma comment(lib, "winmm.lib")
 
 #include "MyH.h"
 #include "Draw.h"
@@ -13,6 +16,11 @@
 HINSTANCE g_hInst;
 LPCTSTR lpszClass = L"Window Class Name";
 LPCTSTR lpszWindowName = L"CookieRun";
+
+
+LPCSTR soundFile = "C:\\CookieRun_WP\\bgm_login.wav";
+LPCSTR soundFile2 = "C:\\CookieRun_WP\\bgm_ingame.wav";
+
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam);
 
@@ -38,6 +46,8 @@ struct KeyEventFlag {
 	bool KeySpace{ false };
 };
 KeyEventFlag KEY;
+void DragMenu(LPARAM lParam);
+void SelectMenu(LPARAM lParam);
 void MouseLeftDownEvent(LPARAM lParam);
 void MouseLeftUpEvent(LPARAM lParam);
 void MouseRightDownEvent(LPARAM lParam);
@@ -70,6 +80,7 @@ void MakeObstacles();
 void MakeCoin();
 void MakeJelly();
 void MakeEffect();
+void CheckFalling();
 void TextOutScoreandCoin(HDC mdc);
 void MakeGrid(HDC mdc);
 RECT Grid[28][28];
@@ -137,23 +148,26 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		Initialize();
 		SetTimer(hWnd, 1, DELTA_TIME * 1000, NULL);
 		SetTimer(hWnd, 2, 100, NULL);
+		SetTimer(hWnd, 3, 1, NULL);
 		break;
 
 	case WM_CHAR:
 		break;
 
 	case WM_KEYDOWN:
-		if(!KEY.down)KeyDownEvents(hWnd, wParam);
+		if (Player->PlayMode) KeyDownEvents(hWnd, wParam);
 		break;
 
 	case WM_KEYUP:
-		KeyUpEvents(hWnd, wParam);
+		if (Player->PlayMode) KeyUpEvents(hWnd, wParam);
 		break;
 
 	case WM_LBUTTONDOWN:
 		//MouseLeftDownEvent(lParam);
+		SelectMenu(lParam);
 		InvalidateRect(hWnd, NULL, false);
 		break;
+
 	case WM_LBUTTONUP:
 		MouseLeftUpEvent(lParam);
 		break;
@@ -164,9 +178,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		MouseRightUpEvent(lParam);
 		break;
 	case WM_MOUSEMOVE:
-		if (MOUSE.left_click) {
-			MOUSE.x = LOWORD(lParam);
-			MOUSE.y = HIWORD(lParam);
+
+		if (Player->PlayMode == false) {
+			DragMenu(lParam);
+			InvalidateRect(hWnd, NULL, false);
 		}
 		break;
 
@@ -179,8 +194,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		DrawObject(mDC, hDC);
 		//MakeGrid(mDC);
 
-		TextOutScoreandCoin(mDC);
-
+		if (Player->StartBackGround == false)
+			TextOutScoreandCoin(mDC);
 
 		BitBlt(hDC, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, mDC, 0, 0, SRCCOPY);
 		TransparentBlt(hDC, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, mDC, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, RGB(0, 0, 0));
@@ -190,26 +205,51 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		DeleteDC(hDC);
 
 		EndPaint(hWnd, &ps);
+
 	}
 				 break;
 
 	case WM_TIMER:
 		switch (wParam) {
 		case 1:
+			if (Player->EndObjectMove == true)
+			{
+				Player->AddObjectMovement(5, 0);
+				TickEvent();
+			}
 
 			if (Player->PlayMode) {
 				GameTime += DELTA_TIME;
 				TickEvent();
-				InvalidateRect(hWnd, NULL, false);
+				MakeEffect();
+				CheckFalling();
 			}
+
+			if (Player->CollisionBox.bottom > WINDOW_HEIGHT - 20)
+			{
+				Player->ani_state = ANI_die;
+			}
+
+			if (Player->PlayMode == false) PlaySoundA(nullptr, nullptr, 0);
+
 			break;
 		case 2:
-			if (Player->hp > 0 && Player->InvincibilityMode == false)
-				Player->hp -= 0.1;
+			if (Player->hp > 0 && Player->InvincibilityMode == false && Player->PlayMode)
+				Player->hp -= 0.3;
+			break;
+		case 3:
+			if (Player->FastMode && Player->PlayMode) {
+				ObjectMgr.AddObject(FastEffect, ImageL.I_FastEffect, 1, 50, Player->pos_y);
+				if (Player->CollisionBox.left < WINDOW_WIDTH && Player->PlayMode == false)
+				{
+					Player->GameEnd = true;
+				}
+			}
 			break;
 		}
 
 		MakeEffect();
+		InvalidateRect(hWnd, NULL, false);
 		break;
 	case WM_DESTROY:
 		DeleteObject(hBitmap);
@@ -220,10 +260,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 }
 
 void Initialize() {
-
+	PlaySoundA("bgm_ingame.wav", nullptr, SND_FILENAME | SND_ASYNC | SND_LOOP | SND_NODEFAULT);
 	ObjectMgr.DeleteAll();
+	ImageL.~ImageLoader();
+	//ObjectMgr.~ObjectManager();
 	ImageL.LoadAllImage();
-
 	float width = WINDOW_WIDTH / 28;
 	float height = WINDOW_HEIGHT / 20;
 
@@ -240,13 +281,24 @@ void Initialize() {
 	MakeObstacles();
 	MakeJelly();
 	MakeCoin();
+	ObjectMgr.AddObject(BackGround_Start, ImageL.I_BackGround_start, 1, 0, 0);
+	ObjectMgr.AddObject(GameStart_dim, ImageL.I_Continue_dim, 1, 380, 500);
+	ObjectMgr.AddObject(GameStart_no, ImageL.I_Continue_no, 1, 380, 500);
 	Player = ObjectMgr.AddObject(Cookie, ImageL.I_AngelCookie, 1, 200, 350);
 	ObjectMgr.AddObject(LifeBar1, ImageL.I_LifeBar1, 1, 40, 32);
 	ObjectMgr.AddObject(LifeBar2, ImageL.I_LifeBar2, 1, 40, 32);
 	ObjectMgr.AddObject(Heart, ImageL.I_Heart, 1, 28, 18);
 	ObjectMgr.AddObject(Pause, ImageL.I_Pause, 1, 920, 30);
 	ObjectMgr.AddObject(Coin_Ikon, ImageL.I_SilverCoin, 1, 500, 30);
-
+	ObjectMgr.AddObject(Continue_dim, ImageL.I_Continue_dim, 1, 360, 220);
+	ObjectMgr.AddObject(Continue_no, ImageL.I_Continue_no, 1, 360, 220);
+	ObjectMgr.AddObject(Exit_dim, ImageL.I_Exit_dim, 1, 367, 317);
+	ObjectMgr.AddObject(Exit_no, ImageL.I_Exit_no, 1, 367, 320);
+	ObjectMgr.AddObject(ScoreBoard, ImageL.I_ScoreBoard, 1, 300, 170);
+	ObjectMgr.AddObject(Playagain_dim, ImageL.I_Playagain_dim, 1, 370, 370);
+	ObjectMgr.AddObject(Playagain_no, ImageL.I_Playagain_no, 1, 370, 370);
+	ObjectMgr.AddObject(EndGame_dim, ImageL.I_EndGame_dim, 1, 540, 370);
+	ObjectMgr.AddObject(EndGame_no, ImageL.I_EndGame_no, 1, 540, 370);
 }
 
 void MakeGrid(HDC mdc) {
@@ -269,7 +321,7 @@ void DrawObject(HDC mdc, HDC hDC) {
 void TickEvent() {
 
 	//if (Player->FastMode == true) {
-	//	ObjectMgr.AddObject(FastEffect, ImageL.I_FastEffect, 1, 0, 350);
+	//	ObjectMgr.AddObject(FastEffect, ImageL.I_FastEffect, 1, 50, 350);
 
 	//}
 
@@ -280,7 +332,7 @@ void TickEvent() {
 		if (ptr->pos_x > -1000)
 		{
 			ptr->TickEvents();
-			if(ptr->pos_x > 0 && ptr->pos_x<WINDOW_WIDTH) CheckCollision(ptr);
+			if (ptr->pos_x > 0 && ptr->pos_x < WINDOW_WIDTH) CheckCollision(ptr);
 			if (Player->MagnetMode == true) MagnetMode(ptr);
 			ptr->SetDebugMode(DeBugMode);
 			ptr->m_ElapseTime += DELTA_TIME;
@@ -460,6 +512,40 @@ void MakeJelly()
 
 void MakeEffect()
 {
+	Object* ptr = ObjectMgr.GetAllObjects();
+
+	while (ptr != nullptr)
+	{
+		if (ptr->type == FastEffect)
+		{
+			ptr->AddObjectMovement(-10, 0);
+		}
+
+		ptr = ptr->next;
+	}
+}
+
+void CheckFalling()
+{
+	Object* ptr = ObjectMgr.GetAllObjects();
+	bool CheckFalling{ false };
+
+	while (ptr != nullptr)
+	{
+		if (ptr->type == Bridge && ((Player->pos_x<ptr->CollisionBox.right + 50 && Player->pos_x > ptr->CollisionBox.left - 50)))
+		{
+			CheckFalling = true;
+		}
+
+		ptr = ptr->next;
+	}
+
+	if (CheckFalling == false && Player->pos_y >= Player->original_y && (Player->BigMode == false) && (Player->FastMode == false) && (Player->InvincibilityMode == false))
+	{
+		//Player->ani_state = ANI_die;
+		Player->AddObjectMovement(0, 70);
+		//Player->PlayMode = false;
+	}
 }
 
 void TextOutScoreandCoin(HDC mDC)
@@ -475,6 +561,43 @@ void TextOutScoreandCoin(HDC mDC)
 	TextOut(mDC, 560, 30, buffer2, lstrlen(buffer2));
 	SelectObject(mDC, oldFont);
 	DeleteObject(currentFont);
+
+	if (Player->PlayMode == false && Player->GameEnd == true)
+	{
+		AddFontResource(TEXT("CookieRun Bold.ttf"));
+		currentFont = CreateFont(70, 0, 0, 0, 0, 0, 0, 0, HANGEUL_CHARSET, 0, 0, 0, VARIABLE_PITCH || FF_ROMAN, TEXT("CookieRun Bold"));
+		oldFont = (HFONT)SelectObject(mDC, currentFont);
+		SetBkMode(mDC, TRANSPARENT);
+		SetTextColor(mDC, RGB(0, 0, 0));
+		//TextOut(mDC, 448, 190, L"score", lstrlen(L"score"));
+		//TextOut(mDC, 452, 190, L"score", lstrlen(L"score"));
+		//TextOut(mDC, 450, 192, L"score", lstrlen(L"score"));
+		//TextOut(mDC, 450, 188, L"score", lstrlen(L"score"));
+		//SetTextColor(mDC, RGB(255, 255, 255));
+		TextOut(mDC, 450, 190, L"score", lstrlen(L"score"));
+		SelectObject(mDC, oldFont);
+		DeleteObject(currentFont);
+		currentFont = CreateFont(40, 0, 0, 0, 0, 0, 0, 0, HANGEUL_CHARSET, 0, 0, 0, VARIABLE_PITCH || FF_ROMAN, TEXT("CookieRun Bold"));
+		oldFont = (HFONT)SelectObject(mDC, currentFont);
+		SetTextColor(mDC, RGB(0, 0, 0));
+		wsprintf(buffer1, L"%d", Player->score);
+		TextOut(mDC, 458, 265, buffer1, lstrlen(buffer1));
+		TextOut(mDC, 462, 265, buffer1, lstrlen(buffer1));
+		TextOut(mDC, 460, 267, buffer1, lstrlen(buffer1));
+		TextOut(mDC, 460, 263, buffer1, lstrlen(buffer1));
+		wsprintf(buffer2, L"%d", Player->coin);
+		TextOut(mDC, 482, 325, buffer2, lstrlen(buffer2));
+		TextOut(mDC, 478, 325, buffer2, lstrlen(buffer2));
+		TextOut(mDC, 480, 323, buffer2, lstrlen(buffer2));
+		TextOut(mDC, 480, 327, buffer2, lstrlen(buffer2));
+		SetTextColor(mDC, RGB(255, 255, 255));
+		wsprintf(buffer1, L"%d", Player->score);
+		TextOut(mDC, 460, 265, buffer1, lstrlen(buffer1));
+		wsprintf(buffer2, L"%d", Player->coin);
+		TextOut(mDC, 480, 325, buffer2, lstrlen(buffer2));
+		SelectObject(mDC, oldFont);
+		DeleteObject(currentFont);
+	}
 }
 
 void MakeBackGround1()
@@ -482,14 +605,19 @@ void MakeBackGround1()
 	float h = ImageL.I_BackGround.GetHeight();
 	float ratio = WINDOW_HEIGHT / h;
 	for (int i = 0; i < 20; ++i)
-		ObjectMgr.AddObject(Background, ImageL.I_BackGround, 1, WINDOW_WIDTH * ratio * i, 0);
+	{
+		if (i == 19)
+			ObjectMgr.AddObject(Background_Last, ImageL.I_BackGround, 1, WINDOW_WIDTH * ratio * i, 0);
+		else
+			ObjectMgr.AddObject(Background, ImageL.I_BackGround, 1, WINDOW_WIDTH * ratio * i, 0);
+	}
 }
 
 void MakeBackGround2()
 {
 	float h = ImageL.I_BackGround2.GetHeight();
 	float ratio = WINDOW_HEIGHT / h;
-	for (int i = 0; i < 10; ++i)
+	for (int i = 0; i < 11; ++i)
 		ObjectMgr.AddObject(Background2, ImageL.I_BackGround2, 1, WINDOW_WIDTH * ratio * i, 0);
 }
 
@@ -623,6 +751,122 @@ void KeyUpEvents(HWND hWnd, WPARAM wParam) {
 	InvalidateRect(hWnd, NULL, false);
 }
 
+void DragMenu(LPARAM lParam)
+{
+	MOUSE.left_click = true;
+	MOUSE.x = LOWORD(lParam);
+	MOUSE.y = HIWORD(lParam);
+
+	Object* ptr = ObjectMgr.GetAllObjects();
+
+	while (ptr != nullptr)
+	{
+		if (ptr->CollisionBox.left <= MOUSE.x && ptr->CollisionBox.right >= MOUSE.x &&
+			ptr->CollisionBox.top <= MOUSE.y && ptr->CollisionBox.bottom >= MOUSE.y)
+		{
+			switch (ptr->type)
+			{
+			case Continue_no:
+				Player->ClickContinue = true;
+				break;
+			case Exit_no:
+				Player->ClickExit = true;
+				break;
+			case GameStart_no:
+				Player->ClickStart = true;
+				break;
+			case EndGame_no:
+				Player->ClickEnd = true;
+				break;
+			case Playagain_no:
+				Player->ClickAgain = true;
+				break;
+			}
+		}
+		else
+		{
+			switch (ptr->type)
+			{
+			case Continue_no:
+				Player->ClickContinue = false;
+				break;
+			case Exit_no:
+				Player->ClickExit = false;
+				break;
+			case GameStart_no:
+				Player->ClickStart = false;
+				break;
+			case EndGame_no:
+				Player->ClickEnd = false;
+				break;
+			case Playagain_no:
+				Player->ClickAgain = false;
+				break;
+			}
+		}
+		ptr = ptr->next;
+	}
+}
+
+void SelectMenu(LPARAM lParam)
+{
+	MOUSE.left_click = true;
+	MOUSE.x = LOWORD(lParam);
+	MOUSE.y = HIWORD(lParam);
+
+	Object* ptr = ObjectMgr.GetAllObjects();
+
+	while (ptr != nullptr)
+	{
+		if (ptr->CollisionBox.left <= MOUSE.x && ptr->CollisionBox.right >= MOUSE.x &&
+			ptr->CollisionBox.top <= MOUSE.y && ptr->CollisionBox.bottom >= MOUSE.y)
+		{
+			switch (ptr->type)
+			{
+			case Pause:
+				PlaySoundA(nullptr, nullptr, 0);
+				Player->PlayMode = false;
+				break;
+			case Continue_dim:
+				PlaySoundA(nullptr, nullptr, 0);
+				PlaySoundA("bgm_ingame.wav", nullptr, SND_FILENAME | SND_ASYNC | SND_LOOP | SND_NODEFAULT);
+				Player->PlayMode = true;
+				break;
+			case Exit_dim:
+				//Player->PlayMode = false;
+				//Player->StartBackGround = true;
+				PlaySoundA(nullptr, nullptr, 0);
+				PlaySoundA("bgm_login.wav", nullptr, SND_FILENAME | SND_ASYNC | SND_LOOP | SND_NODEFAULT);
+				Initialize();
+				return;
+				break;
+			case GameStart_dim:
+				Player->PlayMode = true;
+				Player->StartBackGround = false;
+				PlaySoundA(nullptr, nullptr, 0);
+				if (Player->PlayMode)
+					PlaySoundA("bgm_ingame.wav", nullptr, SND_FILENAME | SND_ASYNC | SND_LOOP | SND_NODEFAULT);
+				break;
+			case EndGame_dim:
+				PlaySoundA(nullptr, nullptr, 0);
+				PlaySoundA("bgm_login.wav", nullptr, SND_FILENAME | SND_ASYNC | SND_LOOP | SND_NODEFAULT);
+				Initialize();
+				return;
+				break;
+			case Playagain_dim:
+				PlaySoundA(nullptr, nullptr, 0);
+				PlaySoundA("bgm_ingame.wav", nullptr, SND_FILENAME | SND_ASYNC | SND_LOOP | SND_NODEFAULT);
+				Initialize();
+				Player->PlayMode = true;
+				Player->StartBackGround = false;
+				return;
+				break;
+			}
+		}
+		ptr = ptr->next;
+	}
+}
+
 void MouseLeftDownEvent(LPARAM lParam) {
 	MOUSE.left_click = true;
 	MOUSE.x = LOWORD(lParam);
@@ -710,18 +954,25 @@ void MagnetMode(Object* obj)
 		|| obj->type == Coin_S || obj->type == Coin_B || obj->type == Coin_G ||
 		obj->type == Big || obj->type == Fast || obj->type == Energy && obj != Player)
 	{
-		if (obj->CollisionBox.right < WINDOW_WIDTH / 2 && obj->CollisionBox.top < Player->CollisionBox.top)
+
+		if (obj->CollisionBox.right - 500 < Player->CollisionBox.right && obj->CollisionBox.top < Player->CollisionBox.top)
 		{
-			obj->AddObjectMovement(-10, 15);
+			obj->AddObjectMovement(-5, 15);
 		}
-		else if (obj->CollisionBox.right < WINDOW_WIDTH / 2 && obj->CollisionBox.bottom > Player->CollisionBox.bottom)
+		else if (obj->CollisionBox.right - 500 < Player->CollisionBox.right && obj->CollisionBox.bottom > Player->CollisionBox.bottom)
 		{
-			obj->AddObjectMovement(-8, -3);
+			obj->AddObjectMovement(-7, -8);
 		}
-		else if (obj->CollisionBox.right < WINDOW_WIDTH / 2 && obj->CollisionBox.top > Player->CollisionBox.top)
+		else if (obj->CollisionBox.right - 500 < Player->CollisionBox.right && obj->CollisionBox.top > Player->CollisionBox.top)
 		{
-			obj->AddObjectMovement(-10, 0);
+			obj->AddObjectMovement(-15, 0);
 		}
+
+		if (obj->CollisionBox.right < Player->CollisionBox.left && obj->CollisionBox.top < Player->CollisionBox.top)
+		{
+			obj->AddObjectMovement(50, 5);
+		}
+
 	}
 
 }

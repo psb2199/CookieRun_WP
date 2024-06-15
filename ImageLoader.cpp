@@ -35,4 +35,14 @@ void ImageLoader::LoadAllImage()
 	I_LifeBar2.Load(L".\\CookieRun_Resource\\gauge_heart_orange.png");
 	I_Heart.Load(L".\\CookieRun_Resource\\icon_heartLife.png");
 	I_Pause.Load(L".\\CookieRun_Resource\\puase.png");
+	I_Continue_no.Load(L".\\CookieRun_Resource\\gamestart_no.png");
+	I_Continue_dim.Load(L".\\CookieRun_Resource\\gamestart_dim.png");
+	I_Exit_no.Load(L".\\CookieRun_Resource\\exit_no.png");
+	I_Exit_dim.Load(L".\\CookieRun_Resource\\exit_dim.png");
+	I_BackGround_start.Load(L".\\CookieRun_Resource\\시작화면.png");
+	I_ScoreBoard.Load(L".\\CookieRun_Resource\\score.png");
+	I_Playagain_dim.Load(L".\\CookieRun_Resource\\Playagain_dim.png");
+	I_Playagain_no.Load(L".\\CookieRun_Resource\\Playagain_no.png");
+	I_EndGame_dim.Load(L".\\CookieRun_Resource\\Exit_dim_r.png");
+	I_EndGame_no.Load(L".\\CookieRun_Resource\\Exit_no_r.png");
 }

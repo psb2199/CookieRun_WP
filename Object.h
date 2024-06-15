@@ -61,7 +61,10 @@ public:
 	int image_raw;
 	int image_col;
 
-	float item_time{ 0 };
+	float item_time_fast{ 0 };
+	float item_time_big{ 0 };
+	float item_time_invicible{ 0 };
+	float item_time_magnet{ 0 };
 
 	bool isJumping{ false };
 	bool MagnetMode{ false };
@@ -71,6 +74,14 @@ public:
 	bool isPassed{ false };
 
 	bool PlayMode{ true };
+	bool GameEnd{ false };
+	bool StartBackGround{ false };
+	bool EndObjectMove{ false };
+	bool ClickContinue{ false };
+	bool ClickExit{ false };
+	bool ClickStart{ false };
+	bool ClickAgain{ false };
+	bool ClickEnd{ false };
 
 	Object* next;
 	Object* prev;

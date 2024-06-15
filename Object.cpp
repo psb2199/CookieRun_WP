@@ -25,7 +25,7 @@ void ShutdownGDIPlus(ULONG_PTR gdiplusToken)
 
 #include "Grobal.h"
 int add_speed = 1;
-
+bool MoveObject{ true };
 
 Object::Object()
 {
@@ -84,8 +84,8 @@ void Object::DrawObjectImage(HDC mdc, HDC hDC)
 				image_col = 4;
 				break;
 			case ANI_double_jumping:
-				image_raw = 0;
-				image_col = 9;
+				image_raw = 1;
+				image_col = 4;
 				break;
 			case ANI_sliding:
 				image_raw = 0;
@@ -120,12 +120,17 @@ void Object::DrawObjectImage(HDC mdc, HDC hDC)
 				}
 				else if (animation_time == 3)
 				{
-					ani_state = ANI_running;
-					count_jump = 0;
+					if (FastMode == true)
+						ani_state = ANI_fast;
+					else
+					{
+						ani_state = ANI_running;
+						count_jump = 0;
+					}
 				}
 				break;
 			case ANI_double_jumping:
-				if (animation_time == 8)
+				if (animation_time == 3)
 				{
 					ani_state = ANI_running;
 				}
@@ -170,9 +175,11 @@ void Object::DrawObjectImage(HDC mdc, HDC hDC)
 
 				break;
 			case ANI_die:
-				if (animation_time== 4)
+				if (animation_time == 4)
 				{
 					PlayMode = false;
+					GameEnd = true;
+					hp = 0;
 				}
 				break;
 			}
@@ -189,7 +196,7 @@ void Object::DrawObjectImage(HDC mdc, HDC hDC)
 				{
 					ObjectImage.Draw(mdc,
 						image.left, image.top, image.right - image.left, image.bottom - image.top, // x, y, 넓이, 높이,
-						line_size* animation_time + animation_time * sprite_size + 2, line_size* (image_raw + 1) + sprite_size * image_raw, sprite_size, sprite_size); // 이미지 내의 좌표
+						line_size * animation_time + animation_time * sprite_size + 2, line_size * (image_raw + 1) + sprite_size * image_raw, sprite_size, sprite_size); // 이미지 내의 좌표
 				}
 			}
 
@@ -203,7 +210,7 @@ void Object::DrawObjectImage(HDC mdc, HDC hDC)
 
 
 		}
-		else if (type == Background || type == Background2)
+		else if (type == Background || type == Background2 || type == Background_Last)
 		{
 			ObjectImage.Draw(mdc,
 				image.left, image.top, image.right - image.left, image.bottom - image.top, // x, y, 넓이, 높이,
@@ -257,26 +264,9 @@ void Object::DrawObjectImage(HDC mdc, HDC hDC)
 		}
 		else if (type == FastEffect)
 		{
-			Graphics graphics(mdc);
-			Image img = (L".\\CookieRun_Resource\\FastEffect.png");
-
-			// 반투명 렌더링을 위해 이미지 속성 설정
-			ColorMatrix colorMatrix = {
-				1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-				0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
-				0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-				0.0f, 0.0f, 0.0f, (float)255 / 255.0f, 0.0f,
-				0.0f, 0.0f, 0.0f, 0.0f, 1.0f
-			};
-
-			ImageAttributes imageAttributes;
-			imageAttributes.SetColorMatrix(&colorMatrix, ColorMatrixFlagsDefault, ColorAdjustTypeBitmap);
-
-			// 이미지 출력
-			graphics.DrawImage(
-				&img,
-				Rect(image.left, image.top, (image.right - image.left), (image.bottom - image.top)),
-				0, 0, ObjectImage.GetWidth(), ObjectImage.GetHeight(), UnitPixel, &imageAttributes);
+			ObjectImage.Draw(mdc,
+				image.left, image.top, image.right - image.left, image.bottom - image.top, // x, y, 넓이, 높이,
+				0, 0, ObjectImage.GetWidth(), ObjectImage.GetHeight());
 		}
 		else if (type == LifeBar1)
 		{
@@ -284,7 +274,10 @@ void Object::DrawObjectImage(HDC mdc, HDC hDC)
 				image.left, image.top, image.right - image.left, image.bottom - image.top, // x, y, 넓이, 높이,
 				0, 0, ObjectImage.GetWidth(), ObjectImage.GetHeight());
 		}
-		else if (type == LifeBar2)
+		else if (type == LifeBar2 || type == Continue_dim || type == Continue_no ||
+			type == Exit_dim || type == Exit_no || type == BackGround_Start
+			|| type == GameStart_dim || type == GameStart_no || type == ScoreBoard
+			|| type == EndGame_dim || type == EndGame_no || type == Playagain_dim || type == Playagain_no)
 		{
 		}
 		else
@@ -313,6 +306,9 @@ void Object::BeginEvents()
 		float m_size = 140;
 		original_y = pos_y;
 		hp = 100;
+		StartBackGround = true;
+		PlayMode = false;
+		add_speed = 1;
 		//FastMode = true;
 		SetObjectVertexLocation(pos_x - m_size * size, pos_y - m_size * size, pos_x + m_size * size, pos_y + m_size * size);
 
@@ -321,13 +317,20 @@ void Object::BeginEvents()
 		CollisionBox_Value.top = 0 * size;
 		CollisionBox_Value.bottom = m_size / 1.5 * size;
 		SetCollisionBox(CollisionBox_Value.left, CollisionBox_Value.right, CollisionBox_Value.top, CollisionBox_Value.bottom);
-	
+
 
 		ani_state = ANI_running;
 		MagnetMode = true;
 		count_jump = 0;
 	}
-	else if (type == Background || type == Background2)
+	else if (type == BackGround_Start)
+	{
+		float ratio1 = ObjectImage.GetWidth() / 1.4;
+		float ratio2 = ObjectImage.GetHeight() / 1.5;
+		SetObjectVertexLocation(pos_x, pos_y, pos_x + ratio1, pos_y + ratio2);
+		SetCollisionBox(ObjectImage.GetWidth() / 3, ObjectImage.GetWidth() / 3, ObjectImage.GetHeight() / 3, ObjectImage.GetHeight() / 3);
+	}
+	else if (type == Background || type == Background2 || type == Background_Last)
 	{
 		float h = ObjectImage.GetHeight();
 		float ratio = WINDOW_HEIGHT / h;
@@ -375,6 +378,13 @@ void Object::BeginEvents()
 		SetObjectVertexLocation(pos_x, pos_y, pos_x + ratio1, pos_y + ratio2);
 		SetCollisionBox(ObjectImage.GetWidth() / 5, ObjectImage.GetWidth() / 5, ObjectImage.GetHeight() / 5, ObjectImage.GetHeight() / 5);
 	}
+	else if (type == EndGame_dim || type == EndGame_no || type == Playagain_dim || type == Playagain_no)
+	{
+		float ratio1 = ObjectImage.GetWidth() / 2.6;
+		float ratio2 = ObjectImage.GetHeight() / 2.6;
+		SetObjectVertexLocation(pos_x, pos_y, pos_x + ratio1, pos_y + ratio2);
+		SetCollisionBox(ObjectImage.GetWidth() / 5, ObjectImage.GetWidth() / 5, ObjectImage.GetHeight() / 5, ObjectImage.GetHeight() / 5);
+	}
 	else if (type == FastEffect)
 	{
 		float ratio1 = ObjectImage.GetWidth() / 1.0;
@@ -396,10 +406,18 @@ void Object::BeginEvents()
 		SetObjectVertexLocation(pos_x, pos_y, pos_x + ratio1, pos_y + ratio2);
 		SetCollisionBox(ObjectImage.GetWidth() / 5, ObjectImage.GetWidth() / 5, ObjectImage.GetHeight() / 5, ObjectImage.GetHeight() / 5);
 	}
-	else if (type == LifeBar2)
+	else if (type == LifeBar2 || type == Continue_dim || type == Continue_no
+		|| type == Exit_dim || type == Exit_no || type == GameStart_dim || type == GameStart_no)
 	{
 		float ratio1 = ObjectImage.GetWidth() / 1.8;
 		float ratio2 = ObjectImage.GetHeight() / 1.8;
+		SetObjectVertexLocation(pos_x, pos_y, pos_x + ratio1, pos_y + ratio2);
+		SetCollisionBox(ObjectImage.GetWidth() / 5, ObjectImage.GetWidth() / 5, ObjectImage.GetHeight() / 5, ObjectImage.GetHeight() / 5);
+	}
+	else if (type == ScoreBoard)
+	{
+		float ratio1 = ObjectImage.GetWidth();
+		float ratio2 = ObjectImage.GetHeight();
 		SetObjectVertexLocation(pos_x, pos_y, pos_x + ratio1, pos_y + ratio2);
 		SetCollisionBox(ObjectImage.GetWidth() / 5, ObjectImage.GetWidth() / 5, ObjectImage.GetHeight() / 5, ObjectImage.GetHeight() / 5);
 	}
@@ -425,76 +443,91 @@ void Object::TickEvents()
 	}
 
 	if (InvincibilityMode == true) {
-		item_time += DELTA_TIME;
-		add_speed = 2;
-		if (item_time > 1) {
+		item_time_invicible += DELTA_TIME;
+		if (item_time_invicible > 1) {
 			InvincibilityMode = false;
-			add_speed = 1;
-			item_time = 0;
+			item_time_invicible = 0;
 		}
 	}
 	if (BigMode == true) {
-		item_time += DELTA_TIME;
-		if (InvincibilityMode) {
-			InvincibilityMode = false;
-			add_speed = 1;
-		}
-		if (item_time > 2.2) {
+		item_time_big += DELTA_TIME;
+		if (item_time_big > 2.2) {
 			BigMode = false;
-			item_time = 0;
+			InvincibilityMode = true;
+			item_time_big = 0;
 		}
 	}
 	if (FastMode == true) {
-		item_time += DELTA_TIME;
+		item_time_fast += DELTA_TIME;
 		InvincibilityMode = false;
 		add_speed = 2;
-		if (item_time > 2.2) {
+		if (item_time_fast > 2.1) {
 			FastMode = false;
+			InvincibilityMode = true;
 			add_speed = 1;
-			item_time = 0;
+			item_time_fast = 0;
 		}
 	}
 
 	if (MagnetMode == true) {
-		item_time += DELTA_TIME;
-		if (item_time > 2.2) {
+		item_time_magnet += DELTA_TIME;
+		if (item_time_magnet > 2.2) {
 			//MagnetMode = false;
-			item_time = 0;
+			item_time_magnet = 0;
 		}
 	}
 
-	if (type == Background)
+	if (MoveObject)
 	{
-		float speed = 8 * add_speed;
-		AddObjectMovement(-speed, 0);
-	}
-	else if (type == Background2)
-	{
-		float speed = 4 * add_speed;
-		AddObjectMovement(-speed, 0);
-	}
-	else if (type == Bridge || type == Obstacle_J || type == Obstacle_S)
-	{
-		float speed = 8 * add_speed;
-		AddObjectMovement(-speed, 0);
-	}
-	else if (type == PinkJelly || type == YellowJelly || type == BigJelly || type == GeneralJelly || type == Coin_S || type == Coin_B || type == Coin_G)
-	{
-		float speed = 8 * add_speed;
-		AddObjectMovement(-speed, 0);
+		if (type == Background)
+		{
+			float speed = 8 * add_speed;
+			AddObjectMovement(-speed, 0);
+		}
+		else if (type == Background_Last)
+		{
+			float h = ObjectImage.GetHeight();
+			float ratio = WINDOW_HEIGHT / h;
+
+			if (pos_x + WINDOW_WIDTH - 70 > WINDOW_WIDTH)
+			{
+				float speed = 8 * add_speed;
+				AddObjectMovement(-speed, 0);
+			}
+			else
+			{
+				MoveObject = false;
+			}
+		}
+		else if (type == Background2)
+		{
+			float speed = 4 * add_speed;
+			AddObjectMovement(-speed, 0);
+		}
+		else if (type == Bridge || type == Obstacle_J || type == Obstacle_S)
+		{
+			float speed = 8 * add_speed;
+			AddObjectMovement(-speed, 0);
+		}
+		else if (type == PinkJelly || type == YellowJelly || type == BigJelly || type == GeneralJelly || type == Coin_S || type == Coin_B || type == Coin_G)
+		{
+			float speed = 8 * add_speed;
+			AddObjectMovement(-speed, 0);
+
+		}
+		else if (type == Big || type == Fast || type == Energy || type == Magnet)
+		{
+			float speed = 8 * add_speed;
+			AddObjectMovement(-speed, 0);
+
+		}
+		//else if (type == FastEffect)
+		//{
+		//	float speed = 16;
+		//	AddObjectMovement(-speed, 0);
+		//}
 
 	}
-	else if (type == Big || type == Fast || type == Energy || type == Magnet)
-	{
-		float speed = 8 * add_speed;
-		AddObjectMovement(-speed, 0);
-
-	}
-	//else if (type == FastEffect)
-	//{
-	//	float speed = 16;
-	//	AddObjectMovement(-speed, 0);
-	//}
 }
 
 void Object::CollisionEvent(Object* byWhat)
@@ -522,6 +555,7 @@ void Object::CollisionEvent(Object* byWhat)
 			score += 5000;
 			byWhat->isPassed = true;
 		}
+
 		// Coin
 		if (type == Cookie && byWhat->type == Coin_S) {
 			byWhat->SetObjectLocation(-1000, 0);
@@ -542,9 +576,10 @@ void Object::CollisionEvent(Object* byWhat)
 		// 장애물 충돌
 		if (type == Cookie && (BigMode == true || FastMode == true) && (byWhat->type == Obstacle_J || byWhat->type == Obstacle_S)) {
 			byWhat->SetObjectLocation(-10000, 0);
+			score += 100;
 			byWhat->isPassed = true;
 		}
-		if (type == Cookie && InvincibilityMode == false && BigMode == false && FastMode == false
+		else if (type == Cookie && InvincibilityMode == false && BigMode == false && FastMode == false
 			&& (byWhat->type == Obstacle_J || byWhat->type == Obstacle_S))
 		{
 			byWhat->isPassed = true;
@@ -677,6 +712,7 @@ void Object::DoJump()
 	int falling_time = 1;
 	int speed = 5;
 	float jumping_time = m_ElapseTime * speed;
+
 	pos_y = jump_height * jumping_time * (jumping_time - falling_time) + original_y;
 
 

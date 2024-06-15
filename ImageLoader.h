@@ -35,6 +35,15 @@ public:
 	CImage I_LifeBar1;
 	CImage I_LifeBar2;
 	CImage I_Pause;
-
+	CImage I_Continue_no;
+	CImage I_Continue_dim;
+	CImage I_Exit_no;
+	CImage I_Exit_dim;
+	CImage I_BackGround_start;
+	CImage I_ScoreBoard;
+	CImage I_Playagain_dim;
+	CImage I_Playagain_no;
+	CImage I_EndGame_dim;
+	CImage I_EndGame_no;
 };
 
