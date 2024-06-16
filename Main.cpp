@@ -214,8 +214,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		case 1:
 			if (Player->EndObjectMove == true)
 			{
-				Player->AddObjectMovement(5, 0);
+				Player->AddObjectMovement(10, 0);
 				TickEvent();
+
+				if (Player->CollisionBox.left < WINDOW_WIDTH)
+				{
+					Player->PlayMode = false;
+					Player->GameEnd = true;
+				}
 			}
 
 			if (Player->PlayMode) {
@@ -850,7 +856,7 @@ void SelectMenu(LPARAM lParam)
 				break;
 			case Playagain_dim:
 				PlaySoundA(nullptr, nullptr, 0);
-				PlaySoundA("bgm_login.wav", nullptr, SND_FILENAME | SND_ASYNC | SND_LOOP | SND_NODEFAULT);
+				PlaySoundA("bgm_ingame.wav", nullptr, SND_FILENAME | SND_ASYNC | SND_LOOP | SND_NODEFAULT);
 				Initialize();
 				Player->PlayMode = true;
 				Player->StartBackGround = false;

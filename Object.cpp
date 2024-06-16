@@ -182,8 +182,8 @@ void Object::DrawObjectImage(HDC mdc, HDC hDC)
 			case ANI_die:
 				if (animation_time == 4)
 				{
-					PlayMode = false;
-					GameEnd = true;
+					//PlayMode = false;
+					//GameEnd = true;
 					hp = 0;
 				}
 				break;
