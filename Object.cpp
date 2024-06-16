@@ -487,7 +487,7 @@ void Object::TickEvents()
 	{
 		if (type == Background)
 		{
-			float speed = 8 * add_speed;
+			float speed = 5 * add_speed;
 			AddObjectMovement(-speed, 0);
 		}
 		else if (type == Background_Last)
@@ -497,7 +497,7 @@ void Object::TickEvents()
 
 			if (pos_x + WINDOW_WIDTH - 70 > WINDOW_WIDTH)
 			{
-				float speed = 8 * add_speed;
+				float speed = 5 * add_speed;
 				AddObjectMovement(-speed, 0);
 			}
 			else
@@ -507,7 +507,7 @@ void Object::TickEvents()
 		}
 		else if (type == Background2)
 		{
-			float speed = 4 * add_speed;
+			float speed = 2 * add_speed;
 			AddObjectMovement(-speed, 0);
 		}
 		else if (type == Bridge || type == Obstacle_J || type == Obstacle_S)
