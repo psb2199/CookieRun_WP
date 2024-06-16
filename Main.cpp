@@ -260,7 +260,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 }
 
 void Initialize() {
-	PlaySoundA("bgm_ingame.wav", nullptr, SND_FILENAME | SND_ASYNC | SND_LOOP | SND_NODEFAULT);
+	PlaySoundA("bgm_ingame.wav", nullptr, SND_FILENAME | SND_ASYNC | SND_NODEFAULT);
 	ObjectMgr.DeleteAll();
 	ImageL.~ImageLoader();
 	//ObjectMgr.~ObjectManager();
@@ -843,7 +843,8 @@ void SelectMenu(LPARAM lParam)
 			case GameStart_dim:
 				Player->PlayMode = true;
 				Player->StartBackGround = false;
-				PlaySoundA(nullptr, nullptr, 0);
+				//PlaySoundA("SoundEff_GetJelly.wav", nullptr, SND_FILENAME | SND_ASYNC | SND_LOOP| SND_NODEFAULT);
+				//PlaySoundA(nullptr, nullptr, 0);
 				if (Player->PlayMode)
 					PlaySoundA("bgm_ingame.wav", nullptr, SND_FILENAME | SND_ASYNC | SND_LOOP | SND_NODEFAULT);
 				break;

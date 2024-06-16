@@ -5,7 +5,12 @@
 #include <iostream>
 #include <chrono>
 #include <gdiplus.h>
+#include <windows.h>
+#include <mmsystem.h>
+#pragma comment(lib, "winmm.lib")
+
 #pragma comment(lib, "gdiplus.lib")
+
 
 using namespace Gdiplus;
 
