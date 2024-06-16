@@ -164,7 +164,7 @@ void ObjectManager::DrawAll(HDC mDC, HDC hDC)
 				}
 				else
 				{
-					Player->EndObjectMove = false;
+					Player->EndObjectMove = true;
 				}
 			}
 			if (Player->PlayMode == false && Player->ClickExit == true && (ptr->type == Exit_dim))
