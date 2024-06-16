@@ -94,11 +94,11 @@ void Object::DrawObjectImage(HDC mdc, HDC hDC)
 				break;
 			case ANI_sliding:
 				image_raw = 0;
-				image_col = 11;
+				image_col = 10;
 				break;
 			case ANI_sliding_up:
 				image_raw = 0;
-				image_col = 14;
+				image_col = 13;
 				break;
 			case ANI_collision:
 				image_raw = 5;
@@ -332,8 +332,9 @@ void Object::BeginEvents()
 	{
 		float ratio1 = ObjectImage.GetWidth() / 1.4;
 		float ratio2 = ObjectImage.GetHeight() / 1.5;
-		SetObjectVertexLocation(pos_x, pos_y, pos_x + ratio1, pos_y + ratio2);
-		SetCollisionBox(ObjectImage.GetWidth() / 3, ObjectImage.GetWidth() / 3, ObjectImage.GetHeight() / 3, ObjectImage.GetHeight() / 3);
+		//SetObjectVertexLocation(pos_x, pos_y, pos_x + ratio1, pos_y + ratio2);
+		SetObjectVertexLocation(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+		//SetCollisionBox(ObjectImage.GetWidth() / 3, ObjectImage.GetWidth() / 3, ObjectImage.GetHeight() / 3, ObjectImage.GetHeight() / 3);
 	}
 	else if (type == Background || type == Background2 || type == Background_Last)
 	{

@@ -155,7 +155,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		break;
 
 	case WM_KEYDOWN:
-		if (Player->PlayMode) KeyDownEvents(hWnd, wParam);
+		if (Player->PlayMode && !KEY.down) KeyDownEvents(hWnd, wParam);
 		break;
 
 	case WM_KEYUP:
@@ -229,13 +229,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 			{
 				Player->ani_state = ANI_die;
 			}
-
-			if (Player->PlayMode == false) PlaySoundA(nullptr, nullptr, 0);
-
 			break;
 		case 2:
 			if (Player->hp > 0 && Player->InvincibilityMode == false && Player->PlayMode)
-				Player->hp -= 0.3;
+				Player->hp -= 0.1;
 			break;
 		case 3:
 			if (Player->FastMode && Player->PlayMode) {
@@ -260,7 +257,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 }
 
 void Initialize() {
-	PlaySoundA("bgm_ingame.wav", nullptr, SND_FILENAME | SND_ASYNC | SND_NODEFAULT);
+	PlaySoundA("bgm_login.wav", nullptr, SND_FILENAME | SND_ASYNC | SND_NODEFAULT);
 	ObjectMgr.DeleteAll();
 	ImageL.~ImageLoader();
 	//ObjectMgr.~ObjectManager();
@@ -810,6 +807,7 @@ void DragMenu(LPARAM lParam)
 
 void SelectMenu(LPARAM lParam)
 {
+
 	MOUSE.left_click = true;
 	MOUSE.x = LOWORD(lParam);
 	MOUSE.y = HIWORD(lParam);
@@ -833,8 +831,6 @@ void SelectMenu(LPARAM lParam)
 				Player->PlayMode = true;
 				break;
 			case Exit_dim:
-				//Player->PlayMode = false;
-				//Player->StartBackGround = true;
 				PlaySoundA(nullptr, nullptr, 0);
 				PlaySoundA("bgm_login.wav", nullptr, SND_FILENAME | SND_ASYNC | SND_LOOP | SND_NODEFAULT);
 				Initialize();
@@ -843,8 +839,6 @@ void SelectMenu(LPARAM lParam)
 			case GameStart_dim:
 				Player->PlayMode = true;
 				Player->StartBackGround = false;
-				//PlaySoundA("SoundEff_GetJelly.wav", nullptr, SND_FILENAME | SND_ASYNC | SND_LOOP| SND_NODEFAULT);
-				//PlaySoundA(nullptr, nullptr, 0);
 				if (Player->PlayMode)
 					PlaySoundA("bgm_ingame.wav", nullptr, SND_FILENAME | SND_ASYNC | SND_LOOP | SND_NODEFAULT);
 				break;
@@ -856,7 +850,7 @@ void SelectMenu(LPARAM lParam)
 				break;
 			case Playagain_dim:
 				PlaySoundA(nullptr, nullptr, 0);
-				PlaySoundA("bgm_ingame.wav", nullptr, SND_FILENAME | SND_ASYNC | SND_LOOP | SND_NODEFAULT);
+				PlaySoundA("bgm_login.wav", nullptr, SND_FILENAME | SND_ASYNC | SND_LOOP | SND_NODEFAULT);
 				Initialize();
 				Player->PlayMode = true;
 				Player->StartBackGround = false;
@@ -869,6 +863,7 @@ void SelectMenu(LPARAM lParam)
 }
 
 void MouseLeftDownEvent(LPARAM lParam) {
+
 	MOUSE.left_click = true;
 	MOUSE.x = LOWORD(lParam);
 	MOUSE.y = HIWORD(lParam);

@@ -218,7 +218,7 @@ void ObjectManager::DrawAll(HDC mDC, HDC hDC)
 		ptr = ptr->next;
 
 	}
-	if (Player->StartBackGround == false)Player->DrawObjectImage(mDC, hDC);
+	//if (Player->StartBackGround == false)Player->DrawObjectImage(mDC, hDC);
 }
 
 Object* ObjectManager::GetAllObjects()
